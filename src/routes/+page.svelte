@@ -1,5 +1,12 @@
-<!-- <h1 class="text-3xl font-bold underline text-red-400">
-  Hello world!
-</h1> -->
+<script>
+	import Modal from "$lib/components/modal/Modal.svelte";
 
-<button class="px-4 py-2 text-green-11 bg-green-2 rounded-lg border border-green-7 hover:border-green-8 border-solid">Success</button>
+</script>
+
+<!-- <div class="w-2/3 h-[900px] bg-indigo-2 mx-auto mt-6 text-center">
+  Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus dolor quidem sunt illo molestias, repudiandae obcaecati in dignissimos fugit repellendus iusto eius corrupti veritatis harum, tenetur nemo? Assumenda, expedita ipsum.
+</div> -->
+
+<style lang="postcss">
+  
+</style>

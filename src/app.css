@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@layer components {
+  .bordered-button-indigo {
+    @apply px-8 py-2 rounded-md text-indigo-11 border border-solid border-indigo-7 hover:border-indigo-8
+  }
+
+  .bordered-button-red {
+    @apply px-8 py-2 rounded-md text-red-11 border border-solid border-red-7 hover:border-red-8
+  }
+
+  .bordered-button-green {
+    @apply px-8 py-2 rounded-md text-green-11 border border-solid border-green-7 hover:border-green-8
+  }
+}
