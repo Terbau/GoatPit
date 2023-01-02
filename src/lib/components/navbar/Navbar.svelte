@@ -2,25 +2,28 @@
   import Link from "$lib/components/navbar/Link.svelte";
   import LoginButton from "$lib/components/navbar/LoginButton.svelte";
   import { getUser } from "@lucia-auth/sveltekit/client";
+	import NavbarSearch from "./NavbarSearch.svelte";
 	import ProfileDropdown from "./ProfileDropdown.svelte";
 
   const user = getUser();
 </script>
 
-<nav class="flex flex-row justify-between items-center w-full h-16 px-16
-            border-b border-solid border-indigo-8"
+<nav class="fixed top-0 flex flex-row items-center w-full h-16 px-16
+            border-b border-solid border-indigo-8 bg-inherit z-10"
 >
-  <div>
-    <a href="/">
-      <img src="https://flowbite.com/docs/images/logo.svg" class="h-6 mr-3 sm:h-9" alt="Flowbite Logo" />
-    </a>
-  </div>
-  <div class="flex flex-row items-center gap-10">
-    <div class="flex flex-row gap-6 text-indigo-12">
+  <a href="/" class="flex flex-row items-center text-3xl mr-5">
+    <img src="/images/goat.png" class="mr-3 h-10" alt="Logo" />
+    GoatPit
+  </a>
+
+  <NavbarSearch />
+
+  <div class="flex flex-row items-center gap-10 ml-auto">
+    <div class="flex flex-row gap-x-6 text-indigo-12">
       <Link href="/">Home</Link>
-      <Link href="/test">About</Link>
-      <Link href="/">Contact</Link>
-      <Link href="/">Info</Link>
+      <Link href="/autorank">AutoRank <span class="badge badge-info badge-md">NEW</span></Link>
+      <Link href="/">Discover</Link>
+      <!-- <Link href="/">Info</Link> -->
     </div>
 
     {#if $user}

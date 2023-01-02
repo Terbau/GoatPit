@@ -43,7 +43,7 @@
     const data = new FormData();
     data.append("email", email);
 
-    const res = await fetch("/api/forgot", {
+    const res = await fetch("/api/auth/forgot", {
       method: "POST",
       body: data,
     });

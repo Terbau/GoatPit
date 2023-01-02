@@ -1,0 +1,13 @@
+{
+  "name": "@goatpit/imdb",
+  "version": "1.0.0",
+  "description": "Simple imdb wrapper/scraper",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

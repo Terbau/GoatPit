@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ url, cookies, locals }) => {
   }
 
   if (provider == "google") {
-    const [authorizationUrl, state] = await googleAuth.getAuthorizationUrl();
+    const [authorizationUrl, state] = googleAuth.getAuthorizationUrl();
     cookies.set('oauth_state', state, {
       path: '/',
       httpOnly: true,

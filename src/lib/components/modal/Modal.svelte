@@ -48,15 +48,4 @@
   } */
 
   /* Chrome, Edge, and Safari */
-  .custom-scrollbar::-webkit-scrollbar {
-    @apply w-[0.35rem];
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent rounded-md;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-indigo-8 rounded-2xl;
-  }
 </style>

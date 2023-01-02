@@ -4,7 +4,8 @@ declare namespace Lucia {
 	type UserAttributes = {
 		email: string;
 		provider: string;
-		createdAt: Date;
+		created_at: Date;
+		id: string;
 	};
 }
 

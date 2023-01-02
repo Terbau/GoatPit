@@ -15,7 +15,7 @@ export const actions: Actions = {
 
 		try {
 			const user = await auth.authenticateUser('email', email, password);
-			const session = await auth.createSession(user.userId);
+			const session = await auth.createSession(user.id);
 			locals.setSession(session);
 		} catch (e) {
 			const exc = e as Error;

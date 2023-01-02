@@ -1,18 +1,18 @@
 import type { Generated } from 'kysely';
-import type { Session, User, Int8 } from '@lucia-auth/adapter-kysely/dbTypes';
+import type { Int8 } from '@lucia-auth/adapter-kysely/dbTypes';
 
-export interface UserTable extends User {
+export interface User {
   id: Generated<string>;
-  provider_id: string;
+  providerId: string;
   provider: string;
-  hashed_password: string | null;
-  email: string | null;
-  createdAt: Date;
+  hashedPassword: string | null;
+  email: string;
+  createdAt: Generated<Date>;
 }
 
-export interface SessionTable extends Session {
+export interface Session {
   id: string;
-  user_id: string;
+  userId: string;
   expires: Int8;
-  idle_expires: Int8;
+  idleExpires: Int8;
 }

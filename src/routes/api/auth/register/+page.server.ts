@@ -35,10 +35,10 @@ export const actions: Actions = {
         attributes: {
           email: email,
           provider: "email",
-          createdAt: new Date(),
+          created_at: new Date(),
         },
       });
-      const session = await auth.createSession(user.userId);
+      const session = await auth.createSession(user.id);
       locals.setSession(session);
     } catch (e) {
       const exc = e as Error;

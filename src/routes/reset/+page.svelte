@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PageData } from "./[token]/$types";
+	import type { PageData } from "./$types";
   import { addAlert } from "$lib/stores/alert";
 	import PasswordInput from "$lib/components/input/PasswordInput.svelte";
 
@@ -57,7 +57,7 @@
     fdata.append("password", password1);
     fdata.append("token", data.token);
 
-    const res = await fetch("/api/reset", {
+    const res = await fetch("/api/auth/reset", {
       method: "POST",
       body: fdata,
     });

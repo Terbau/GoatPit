@@ -35,7 +35,7 @@
     generalError = "";
   };
 
-  const handleSubmit = (e: SubmitEvent) => {
+  const handleSubmit = (e: any) => {  // Stop crying, TypeScript
     resetForm(false);
 
     if (e.submitter?.id == "sign-in") {
@@ -74,7 +74,7 @@
     data.append("email", email);
     data.append("password", password);
 
-    const res = await fetch("/api/login", {
+    const res = await fetch("/api/auth/login", {
       method: "POST",
       body: data,
     });
@@ -93,7 +93,7 @@
 
     data.append("password", password);
 
-    const res = await fetch("/api/register", {
+    const res = await fetch("/api/auth/register", {
       method: "POST",
       body: data,
     });

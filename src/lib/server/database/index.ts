@@ -8,9 +8,13 @@ import {
   Migrator,
   PostgresDialect,
   type Migration,
+  CamelCasePlugin,
 } from 'kysely';
 import type { Database } from './types';
-import * as m1 from './migrations/0001_initial';
+import * as m1 from './migrations/0001_user_session';
+import * as m2 from './migrations/0002_imdb';
+import * as m3 from './migrations/0003_watchlist';
+import * as m4 from './migrations/0004_eloranking';
 
 
 export const db = new Kysely<Database>({
@@ -23,6 +27,7 @@ export const db = new Kysely<Database>({
       password: 'postgres',
     }),
   }),
+  plugins: [new CamelCasePlugin()]
 });
 
 // Use automatic database migrations to create the database schema.
@@ -55,8 +60,20 @@ export const db = new Kysely<Database>({
     db,
     provider: new CustomMigrationProvider([
       {
-        name: '0001_initial',
+        name: '0001_user_session',
         migration: m1,
+      },
+      {
+        name: '0002_imdb',
+        migration: m2,
+      },
+      {
+        name: '0003_watchlist',
+        migration: m3,
+      },
+      {
+        name: '0004_eloranking',
+        migration: m4,
       }
     ]),
   });

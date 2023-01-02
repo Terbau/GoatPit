@@ -3,7 +3,7 @@ import { sql, type Kysely } from "kysely";
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable("user")
-    .addColumn("id", "varchar(255)", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()::text`))
+    .addColumn("id", "uuid", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()`))
     .addColumn("provider_id", "varchar(255)", (col) => col.unique().notNull())
     .addColumn("provider", "varchar(255)", (col) => col.notNull())
     .addColumn("hashed_password", "varchar(255)")
@@ -13,8 +13,8 @@ export async function up(db: Kysely<any>): Promise<void> {
 
   await db.schema
     .createTable("session")
-    .addColumn("id", "varchar(255)", (col) => col.primaryKey().defaultTo(sql`gen_random_uuid()::text`))
-    .addColumn("user_id", "varchar(255)", (col) => col.notNull().references("user.id").onDelete("cascade"))
+    .addColumn("id", "varchar(255)", (col) => col.primaryKey())
+    .addColumn("user_id", "uuid", (col) => col.notNull().references("user.id").onDelete("cascade"))
     .addColumn("expires", "bigint", (col) => col.notNull())
     .addColumn("idle_expires", "bigint", (col) => col.notNull())
     .execute();

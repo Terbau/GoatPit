@@ -1,5 +1,4 @@
 import lucia from 'lucia-auth';
-import adapterKysely from '@lucia-auth/adapter-kysely';
 import { dev } from '$app/environment';
 import { db } from '$lib/server/database';
 import google from '@lucia-auth/oauth/google';
@@ -8,17 +7,19 @@ import {
 	GOOGLE_CLIENT_SECRET,
 	DOMAIN,
 } from '$env/static/private';
+import adapter from './lucia/kysely-adapter';
 
 
 export const auth = lucia({
-	adapter: adapterKysely(db),
+	adapter: adapter(db),
 	env: dev ? 'DEV' : 'PROD',
 	transformUserData: (userData) => {
+		console.log("userId", userData.id)
 		return {
-			userId: userData.id,
+			id: userData.id,
 			email: userData.email,
 			provider: userData.provider,
-			createdAt: userData.createdAt,
+			createdAt: userData.created_at,
 		};
 	}
 });

@@ -1,7 +1,20 @@
-import type { DB } from "@lucia-auth/adapter-kysely/dbTypes";
-import type { SessionTable, UserTable } from "./user";
+import type { Watchlist, WatchlistItem } from './watchlist';
+import type { IMDBGenre, IMDBStarFilmography, IMDBStar, IMDBItem, IMDBItemGenre, IMDBCreator, IMDBCreatorFilmography } from "./imdb";
+import type { Session, User } from "./user";
+import type { ItemElo, ItemEloMatchup } from './eloranking';
 
-export interface Database extends DB {
-  user: UserTable;
-  session: SessionTable;
+export interface Database {
+  user: User;
+  session: Session;
+  imdbCreator: IMDBCreator;  // Also known as directors some times
+  imdbStar: IMDBStar;
+  imdbCreatorFilmography: IMDBCreatorFilmography;
+  imdbStarFilmography: IMDBStarFilmography;
+  imdbGenre: IMDBGenre;
+  imdbItem: IMDBItem;
+  imdbItemGenre: IMDBItemGenre;
+  watchlist: Watchlist;
+  watchlistItem: WatchlistItem;
+  itemElo: ItemElo;
+  itemEloMatchup: ItemEloMatchup;
 }

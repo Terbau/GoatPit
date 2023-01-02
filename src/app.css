@@ -15,4 +15,44 @@
   .bordered-button-green {
     @apply px-8 py-2 rounded-md text-green-11 border border-solid border-green-7 hover:border-green-8
   }
+
+  /* Override daisyui padding for alerts */
+  .alert {
+    @apply py-3
+  }
+
+  /* Inverted stack, similar to how daisyui stack works, just inverted so
+  last element is on top instead of the first one. */
+  .inverted-stack {
+    @apply inline-grid place-items-center items-end;
+  }
+
+  .inverted-stack > * {
+    @apply col-start-1 row-start-1 w-full;
+    transform: translateY(20%) scale(0.95);
+    z-index: 1;
+  }
+
+  .inverted-stack > *:nth-last-child(2) {
+    transform: translateY(10%) scale(0.98);
+    z-index: 2;
+  }
+
+  .inverted-stack > *:nth-last-child(1) {
+    transform: translateY(0) scale(1);
+    z-index: 3;
+  }
+
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    @apply w-[0.35rem];
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent rounded-md;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-indigo-8 rounded-2xl;
+  }
 }
