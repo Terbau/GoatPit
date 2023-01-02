@@ -3,11 +3,17 @@ import type { RequestHandler } from "./$types";
 import { addItemsToDefaultWatchlistIfNotExists, deleteItemsFromDefaultWatchlist, getDefaultWatchlistItemsByUserId } from "$lib/server/functions";
 
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, url }) => {
   const userId = params.userId;
 
+  const orderBy = url.searchParams.get("orderBy") || "eloRating" || "addedAt";
+  const orderDirection = url.searchParams.get("orderDirection") || "DESC";
+
   try {
-    const items = await getDefaultWatchlistItemsByUserId(userId);
+    const items = await getDefaultWatchlistItemsByUserId(userId, {
+      orderBy,
+      orderDirection,
+    });
     return json(items);
   } catch (e) {
     const err = e as Error;

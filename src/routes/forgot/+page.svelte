@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from "$app/environment";
 	import EmailInput from "$lib/components/input/EmailInput.svelte";
 	import { addAlert } from "$lib/stores/alert";
 
@@ -38,6 +39,8 @@
   }
 
   const handleSubmit = async () => {
+    if (!browser) return;
+    
     resetForm(false);
 
     const data = new FormData();

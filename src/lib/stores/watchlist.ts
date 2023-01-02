@@ -7,14 +7,22 @@ export const defaultWatchlist: Writable<ExtendedWatchlistItem[]> = writable([]);
 export const activeWatchlistUserId = writable("");
 export const watchlistItemIsHighlighted = writable(false);
 
-const initialSortDirectionValue = browser ? window.localStorage.getItem("watchlistSortDirection") || "asc": "asc";
+const initialWatchlistActiveGenresValue: {[genre: string]: boolean} = browser ? JSON.parse(window.localStorage.getItem("watchlistActiveGenres") || "{}") : {};
+export const watchlistActiveGenres = writable<{[genre: string]: boolean}>(initialWatchlistActiveGenresValue);
+
+const initialSortDirectionValue = browser ? window.localStorage.getItem("watchlistSortDirection") || "desc": "desc";
 export const watchlistSortDirection = writable(initialSortDirectionValue);
-const initialSortOptionValue = browser ? window.localStorage.getItem("watchlistSortOption") || "added": "added";
+const initialSortOptionValue = browser ? window.localStorage.getItem("watchlistSortOption") || "addedAt": "addedAt";
 export const watchlistSortOption = writable(initialSortOptionValue);
+
+watchlistActiveGenres.subscribe((value) => {
+  if (browser) {
+    window.localStorage.setItem("watchlistActiveGenres", JSON.stringify(value));
+  }
+});
 
 watchlistSortDirection.subscribe((value) => {
   if (browser) {
-    console.log("storing")
     window.localStorage.setItem("watchlistSortDirection", value);
   }
 });

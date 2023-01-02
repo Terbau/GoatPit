@@ -41,7 +41,7 @@
   {:else}
     <button
       on:click={handleSortDirectionButtonClick}
-      class="p-2 h-11 w-11 fill-slate-9 active:fill-slate-10 {sortDirection == 'desc' ? 'scale-y-[-1]' : ''}"
+      class="p-2 h-11 w-11 fill-slate-9 active:fill-slate-10 {sortDirection == 'asc' ? 'scale-y-[-1]' : ''}"
     >
       <SortLargeToSmallIcon />
     </button>

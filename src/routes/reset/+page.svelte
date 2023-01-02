@@ -2,6 +2,7 @@
 	import type { PageData } from "./$types";
   import { addAlert } from "$lib/stores/alert";
 	import PasswordInput from "$lib/components/input/PasswordInput.svelte";
+	import { browser } from "$app/environment";
 
   export let data: PageData;
 
@@ -46,6 +47,8 @@
   }
 
   const handleSubmit = async () => {
+    if (!browser) return;
+    
     resetForm(false);
 
     if (password1 !== password2) {

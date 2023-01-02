@@ -8,6 +8,7 @@ export interface ExtendedIMDBItem extends IMDBItem {
   creators: IMDBCreator[];
   genres: IMDBGenre[];
   stars: IMDBStar[];
+  eloRating: number | null;
 }
 
 export interface ExtendedWatchlistItem extends WatchlistItem {
@@ -22,6 +23,8 @@ interface QueryResult {
 interface GetItemsOptions {
   itemIds?: string[] | undefined;
   imdbItemIds?: string[] | undefined;
+  orderBy?: string | undefined;
+  orderDirection?: string | undefined;
 }
 
 // Custom exception
@@ -42,13 +45,32 @@ export const getDefaultWatchlistItemsByUserId = async (userId: string, options: 
     toCheck = sql`AND imdb_item.id IN (${sql.join(options.imdbItemIds)})`
   }
 
+  let orderBy: string;
+  switch (options.orderBy) {
+    case 'eloRating':
+      orderBy = 'item_elo.elo_rating';
+      break;
+    default:
+      orderBy = 'watchlist_item.created_at';
+  }
+
+  let orderDirection: "ASC" | "DESC";
+  switch (options.orderDirection?.toUpperCase()) {
+    case 'ASC':
+      orderDirection = 'ASC';
+      break;
+    default:
+      orderDirection = 'DESC';
+  }
+
+
   const statement = sql<QueryResult>`
     WITH s AS (
       SELECT COALESCE(json_agg(res) FILTER (WHERE res.id IS NOT NULL)) AS items
       FROM (
         SELECT watchlist_item.*, (
           SELECT item FROM (
-            SELECT imdb_item.*,
+            SELECT imdb_item.*, item_elo.elo_rating,
             (
               SELECT
               COALESCE(json_agg(imdb_creator) FILTER (WHERE imdb_creator.id IS NOT NULL), '[]')
@@ -75,9 +97,10 @@ export const getDefaultWatchlistItemsByUserId = async (userId: string, options: 
         FROM watchlist
         LEFT JOIN watchlist_item ON watchlist.id = watchlist_item.watchlist_id
         LEFT JOIN imdb_item ON watchlist_item.imdb_item_id = imdb_item.id
+        LEFT JOIN item_elo ON (imdb_item.id = item_elo.imdb_item_id AND item_elo.user_id = ${userId})
         WHERE watchlist.user_id = ${userId} AND watchlist.is_default = true ${toCheck}
-        GROUP BY watchlist_item.id, imdb_item.id
-        ORDER BY watchlist_item.created_at DESC
+        GROUP BY watchlist_item.id, imdb_item.id, item_elo.elo_rating
+        ORDER BY ${sql.ref(orderBy)} ${sql.raw(orderDirection)} NULLS LAST
       ) AS res
     ), i AS (
       INSERT INTO watchlist (user_id, is_default, name) 
@@ -108,6 +131,8 @@ export const getDefaultWatchlistItemsByUserId = async (userId: string, options: 
 
 export const addIMDBItemsIfNotExists = async (userId: string, itemIds: string[]): Promise<string[]> => {
   if (itemIds.length <= 0) return [];
+
+  // FIX IMPORT DUPLICATES
 
   const imdbItems = await db
     .selectFrom("imdbItem")

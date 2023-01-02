@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from "$app/environment";
 	import TextInput from "$lib/components/input/TextInput.svelte";
   import { getUser } from "@lucia-auth/sveltekit/client";
 	import type { PageServerData } from "./$types";
@@ -12,6 +13,8 @@
   let respContent = '';
 
   const handleSubmit = async () => {
+    if (!browser) return;
+
     const splitMovieIds = movieIds.split(',');
 
     const resp = await fetch(

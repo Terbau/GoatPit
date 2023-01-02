@@ -9,6 +9,7 @@
   import { beforeNavigate } from "$app/navigation";
 	import GoogleIcon from "../icons/GoogleIcon.svelte";
 	import TwitterIcon from "../icons/TwitterIcon.svelte";
+	import { browser } from "$app/environment";
 
   beforeNavigate(() => {
     closeModal(loginModalOpen);
@@ -70,6 +71,8 @@
   }
 
   const login = async () => {
+    if (!browser) return;
+
     const data = new FormData();
     data.append("email", email);
     data.append("password", password);
@@ -88,6 +91,8 @@
   };
 
   const signUp = async () => {
+    if (!browser) return;
+    
     const data = new FormData();
     data.append("email", email);
 

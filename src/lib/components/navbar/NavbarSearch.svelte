@@ -6,6 +6,7 @@
 	import LoadingSearchInput from "../input/LoadingSearchInput.svelte";
 	import { clickOutside, transformImdbImageSize } from "$lib/utils";
 	import { getUser } from "@lucia-auth/sveltekit/client";
+	import { browser } from "$app/environment";
 
   // export let userId: string;
   const user = getUser();
@@ -20,6 +21,8 @@
   // resultEntries = [{"id":"tt1375666","title":"Inception","type":"movie","yearReleased":2010,"image":{"height":1037,"imageUrl":"https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg","width":700},"rank":289,"highlightedActors":"Leonardo DiCaprio, Joseph Gordon-Levitt"},{"id":"tt8269586","title":"Bikini Inception","type":"movie","yearReleased":2015,"image":{"height":500,"imageUrl":"https://m.media-amazon.com/images/M/MV5BNDk3NTNmNGEtOWJkYi00NGEyLThkZDQtOTBlZmRhN2IwYTk0XkEyXkFqcGdeQXVyNTM3MDMyMDQ@._V1_.jpg","width":375},"rank":83662,"highlightedActors":"Paizley Bishop, Byamba"},{"id":"tt6793710","title":"The Crack: Inception","type":"movie","yearReleased":2019,"image":{"height":960,"imageUrl":"https://m.media-amazon.com/images/M/MV5BZTU1M2U4OWUtZTQ5OS00OWM1LTljN2EtMWJmZDgxNzUwZGNkXkEyXkFqcGdeQXVyMTA0MjU0Ng@@._V1_.jpg","width":672},"rank":71351,"highlightedActors":"Carlos Santos, Miguel Ángel Muñoz"},{"id":"tt12960252","title":"Inception Premiere","type":"movie","yearReleased":2010,"rank":480908,"highlightedActors":"Tera Hendrickson, Johnny Marr"},{"id":"tt5581256","title":"Inception","type":"movie","rank":1016250,"highlightedActors":""}]
 
   const searchAndDisplay = async () => {
+    if (!browser) return;
+
     activeTimeout = null;
     searching = true;
 
@@ -54,6 +57,7 @@
   };
 
   const handleAddToWatchlist = async (entry: SearchResultEntry) => {
+    if (!browser) return;
     console.log("add to watchlist", entry);
     // Close the search dropdown...
 

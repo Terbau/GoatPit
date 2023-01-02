@@ -5,6 +5,7 @@
 	import { getUser } from '@lucia-auth/sveltekit/client';
 	import type { PageData } from './$types';
 	import type { ItemEloMatchup, RandomMatchup, RandomMatchupPayload } from '$lib/server/elo/types';
+	import { browser } from '$app/environment';
 
 	export let data: PageData;
 
@@ -61,6 +62,8 @@
   }
 
 	const handleClick = async (itemNum: 1 | 2) => {
+    if (!browser) return;
+
 		if (hasClicked || !item1 || !item2 || !$currentGame) return;
 		hasClicked = true;
     const sleepPromise = sleep(500);

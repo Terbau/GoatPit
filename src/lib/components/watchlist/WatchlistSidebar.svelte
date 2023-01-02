@@ -1,13 +1,58 @@
 <script lang="ts">
-	import { addAlert } from "$lib/stores/alert";
-	import { activeWatchlistUserId, prependToWatchlist } from "$lib/stores/watchlist";
-	import { getUser } from "@lucia-auth/sveltekit/client";
+	import { browser } from '$app/environment';
+	import type { IMDBGenre } from '$lib/server/database/types/imdb';
+	import type { ExtendedWatchlistItem } from '$lib/server/functions';
+	import { addAlert } from '$lib/stores/alert';
+	import {
+		activeWatchlistUserId,
+		prependToWatchlist,
+		defaultWatchlist,
+		watchlistActiveGenres
+	} from '$lib/stores/watchlist';
+	import { getUser } from '@lucia-auth/sveltekit/client';
+	import InfoTooltip from '../tooltip/InfoTooltip.svelte';
 
 	export let userId: string;
-  const user = getUser();
+	const user = getUser();
 
 	let importButtonDisabled = true;
 	let imdbUserId: string | null;
+
+	let genres: string[];
+	$: genres = (() => {
+		const genresSet = new Set<string>();
+		$defaultWatchlist.forEach((item: ExtendedWatchlistItem) => {
+			item.item.genres.forEach((genre) => {
+				if (genresSet.has(genre.name)) return;
+
+				genresSet.add(genre.name);
+			});
+		});
+
+		return Array.from(genresSet);
+	})();
+
+	const handleGenreChange = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		const genre = target.value;
+		const checked = target.checked;
+
+		if (genre === 'all') {
+      if (checked) {
+        $watchlistActiveGenres = {};
+      }
+      else {
+        $watchlistActiveGenres = Object.fromEntries(genres.map((genre) => [genre, false]));
+      }
+
+      return;
+    }
+
+		$watchlistActiveGenres = {
+			...$watchlistActiveGenres,
+			[genre]: checked
+		};
+	};
 
 	const getWatchlistUserIdFromLink = (link: string): string | null => {
 		// pattern /^(?:https:\/\/)?(?:www\.)?imdb\.com\/user\/(.*)\/watchlist(?:\?.*)?$/
@@ -22,103 +67,91 @@
 		imdbUserId = getWatchlistUserIdFromLink(value);
 	};
 
-  const handleSubmit = async () => {
-    if (!imdbUserId) return;
+	const handleSubmit = async () => {
+    if (!browser) return;
+		if (!imdbUserId) return;
 
-    const resp = await fetch(`/api/user/${userId}/watchlist/items/import`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ imdbUserId }),
-    });
+		const resp = await fetch(`/api/user/${userId}/watchlist/items/import`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ imdbUserId })
+		});
 
-    if (resp.ok) {
-      if ($activeWatchlistUserId == $user?.id) {
-        const respData = await resp.json();
-        prependToWatchlist(respData.newItems);
-        addAlert({
-          type: "success",
-          message: `Imported IMDb watchlist items`,
-        });
-      }
-    }
-  };
+		if (resp.ok) {
+			if ($activeWatchlistUserId == $user?.id) {
+				const respData = await resp.json();
+				prependToWatchlist(respData.newItems);
+				addAlert({
+					type: 'success',
+					message: `Imported IMDb watchlist items`
+				});
+			}
+		}
+	};
 </script>
 
-<div class="w-64 mt-12 shrink-0 flex flex-col">
-  {#if $user?.id == userId}
-    <form class="flex flex-col gap-y-2" on:submit|preventDefault={handleSubmit}>
-      <!-- <label class="font-bold text-lg" for="">Import from IMDb watchlist</label> -->
+<div class="w-64 mt-12 shrink-0 flex flex-col gap-y-10">
+	<form on:change={handleGenreChange}>
+		<h2>Genres</h2>
+    <div class="flex flex-row items-center gap-x-1 mt-2">
       <input
-        type="text"
-        placeholder="IMDb watchlist"
-        class="input w-full max-w-xs"
-        on:input={handleInputChange}
+        type="checkbox"
+        value="all"
+        class="checkbox checkbox-primary"
+        checked={!genres.some(
+          (genre) => ![undefined, true].includes($watchlistActiveGenres[genre])
+        )}
       />
-      <button
-        class="btn btn-warning {!imdbUserId
-          ? 'btn-disabled'
-          : ''}">Import</button
-      >
-    </form>
-  {/if}
+      <span class="label-text">Select all</span>
+    </div>
+		<div class="divider" />
+		<ul class="flex flex-col gap-y-2">
+			{#each genres.sort() as genre}
+				<li class="flex flex-row items-center gap-x-1">
+					<input
+						type="checkbox"
+						value={genre}
+						checked={[undefined, true].includes($watchlistActiveGenres[genre])}
+						class="checkbox checkbox-primary"
+					/>
+					<span class="label-text">{genre}</span>
+				</li>
+			{/each}
+		</ul>
+	</form>
+
+	{#if $user?.id == userId}
+		<form class="flex flex-col" on:submit|preventDefault={handleSubmit}>
+			<!-- <label class="font-bold text-lg" for="">Import from IMDb watchlist</label> -->
+			<h2 class="flex flex-row items-center gap-x-1">
+				Import items
+				<InfoTooltip label="Import items from IMDb watchlist" class="h-6 w-6" />
+			</h2>
+
+			<div class="divider" />
+			<div class="flex flex-col gap-y-2">
+				<input
+					type="text"
+					placeholder="IMDb watchlist"
+					class="input w-full max-w-xs"
+					on:input={handleInputChange}
+				/>
+				<button class="btn btn-warning {!imdbUserId ? 'btn-disabled bg-yellow-5' : ''}">
+					Import
+				</button>
+			</div>
+		</form>
+	{/if}
 </div>
 
-<!-- 
-<div class="w-64 shrink-0 flex flex-col">
-  <div class="flex flex-row bg-indigo-3 focus-within:ring-2 focus-within:ring-indigo-11 rounded-lg mb-10">
-    <input
-      type="text"
-      placeholder="Search IMDb..."
-      class="font-normal rounded-lg px-4 py-2 bg-inherit w-full
-              focus:outline-none focus:ring-0"
-      bind:value={searchValue}
-      on:input={handleSearchChange}
-    >
-    <div class="w-8 p-1 fill-indigo-9 flex items-center justify-center mr-1">
-      {#if activeTimeout || searching}
-        <Spinner animated />
-      {/if}
-    </div>
-  </div>
-
-  <LoadingTextInput>Search:</LoadingTextInput>
-  
-
-  {#if resultEntries.length > 0}
-    <div class="mt-3 flex flex-col gap-y-2">
-      {#each resultEntries as entry}
-        {#if entry.image && entry.yearReleased && entry.yearReleased <= currentYear}
-          <div class="flex flex-row gap-x-2 hover:bg-indigo-3 cursor-pointer group">
-            <div class="h-20 w-14 relative">
-              <img class="h-full w-full object-cover" src={entry.image.imageUrl} alt="">
-              <div class="absolute top-0 bottom-0 h-full w-full
-                        bg-black/50 flex items-center justify-center invisible group-hover:visible">
-                <button 
-                  class="w-8 h-8 p-2 flex items-center justify-center fill-indigo-12
-                         bg-indigo-8 hover:bg-indigo-9 active:bg-indigo-10 rounded-md"
-                  on:click={() => handleAddToWatchlist(entry)}
-                >
-                  <PlusIcon />
-                </button>
-              </div>
-            </div>
-            <div class="flex flex-col">
-              <p class="font-bold">{entry.title}</p>
-              <p class="text-sm">{entry.yearReleased}</p>
-            </div>
-
-            
-          </div>
-        {/if}
-      {/each}
-    </div>
-  {/if}
-</div> -->
-
 <style lang="postcss">
-	fieldset {
-		@apply flex flex-col gap-y-1;
+	h2 {
+		@apply font-bold text-xl;
+	}
+
+	.divider {
+		@apply my-1;
 	}
 </style>

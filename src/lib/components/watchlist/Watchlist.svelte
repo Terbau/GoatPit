@@ -1,12 +1,15 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
 	import type { ExtendedWatchlistItem } from '$lib/server/functions';
-	import { watchlistSortDirection, watchlistSortOption } from '$lib/stores/watchlist';
+	import {
+		watchlistSortDirection,
+		watchlistSortOption,
+		watchlistActiveGenres
+	} from '$lib/stores/watchlist';
 	import { getUser } from '@lucia-auth/sveltekit/client';
-	import { select_options } from 'svelte/internal';
 	import type { Writable } from 'svelte/store';
 	import InfoIcon from '../icons/InfoIcon.svelte';
-	import SortLargeToSmallIcon from '../icons/SortLargeToSmallIcon.svelte';
 	import SortSelect, { type SortOption } from '../input/SortSelect.svelte';
 	import SkeletonWatchlistItem from './SkeletonWatchlistItem.svelte';
 	import WatchlistItem from './WatchlistItem.svelte';
@@ -18,23 +21,34 @@
 	const user = getUser();
 	let loading = true;
 
-	afterNavigate(async () => {
-		console.log('afterNavigate');
+	const fetchAndSetItems = async () => {
+		if (!browser) return;
+
 		loading = true;
 
-		const resp = await fetch(`/api/user/${userId}/watchlist/items`);
+		const params = new URLSearchParams();
+		params.append('orderBy', $watchlistSortOption);
+		params.append('orderDirection', $watchlistSortDirection);
+
+		const resp = await fetch(
+			`http://127.0.0.1:5173/api/user/${userId}/watchlist/items?` + params
+		);
 		const fetchedItems = await resp.json();
 
 		items.set(fetchedItems);
 		loading = false;
+	};
+
+	afterNavigate(() => {
+		fetchAndSetItems();
+		console.log("Navigate")
 	});
+	// watchlistSortOption.subscribe(fetchAndSetItems);
+	// watchlistSortDirection.subscribe(fetchAndSetItems);
 
 	const sortOptions: SortOption[] = [
 		{ label: 'Date added', value: 'added' },
-		{ label: 'Title', value: 'title' },
-		{ label: 'Rating', value: 'rating' },
-    { label: 'Your rating', value: 'ownUserRating' },
-    { label: 'Owners rating', value: 'ownersRating' },
+		{ label: 'Your Elo Rating', value: 'eloRating' },
 	];
 
 	sortOptions.forEach((option) => {
@@ -46,7 +60,13 @@
 	const handleSelect = (e: Event) => {
 		const selectedOption = e.target as HTMLSelectElement;
 		watchlistSortOption.set(selectedOption.value);
-    console.log(selectedOption.value)
+		console.log(selectedOption.value);
+		fetchAndSetItems();
+	};
+
+	const handleSortDirectionChange = (e: CustomEvent<string>) => {
+		watchlistSortDirection.set(e.detail);
+		fetchAndSetItems();
 	};
 </script>
 
@@ -59,11 +79,9 @@
 			<SortSelect
 				sortDirection={$watchlistSortDirection}
 				options={sortOptions}
-        loading={loading}
+				{loading}
 				on:change={handleSelect}
-        on:sortDirectionChange={(e) => {
-          watchlistSortDirection.set(e.detail);
-        }}
+				on:sortDirectionChange={handleSortDirectionChange}
 			/>
 		</div>
 
@@ -78,7 +96,9 @@
 		{:else if $items.length > 0 && !loading}
 			<ul class="flex flex-col gap-4 grow">
 				{#each $items as item (item.id)}
-					<WatchlistItem {item} {userId} />
+					{#if item.item.genres.some( (genre) => [undefined, true].includes($watchlistActiveGenres[genre.name]) )}
+						<WatchlistItem {item} {userId} />
+					{/if}
 				{/each}
 			</ul>
 		{:else}

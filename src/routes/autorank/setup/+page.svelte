@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import InfoIcon from '$lib/components/icons/InfoIcon.svelte';
 	import MultipleSelect, { type SelectOption } from '$lib/components/input/MultipleSelect.svelte';
 	import { currentGame } from '$lib/stores/autorank';
 	import { getUser } from '@lucia-auth/sveltekit/client';
-	import { redirect } from '@sveltejs/kit';
 
   const user = getUser();
 
@@ -22,6 +22,7 @@
 	let selectedCommonFactorOptions: SelectOption[];
 
 	const handleSubmit = async () => {
+		if (!browser) return;
 		console.log('submit');
     console.log(selectedWatchlistOptions)
     console.log(selectedCommonFactorOptions)
@@ -35,6 +36,7 @@
     if (watchlistIds.length > 0)
       params.append('watchlistIds', watchlistIds.join(','));
 
+		// TODO: FIX [?]
     const resp = await fetch(
       `/api/autorank/${$user?.id}` + params,
     );

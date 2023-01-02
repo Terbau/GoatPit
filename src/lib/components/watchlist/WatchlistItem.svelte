@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { beforeNavigate } from '$app/navigation';
 	import type { ExtendedWatchlistItem } from '$lib/server/functions';
 	import { addAlert } from '$lib/stores/alert';
@@ -35,9 +36,9 @@
 		closeFocus();
 	});
 
-
-
   const handleDelete = async () => {
+    if (!browser) return;
+    
     const itemIds = [item.id]
 
     const resp = await fetch(`/api/user/${userId}/watchlist/items`, {
