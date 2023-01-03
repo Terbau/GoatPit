@@ -27,60 +27,60 @@
     <ProfileIcon />
   </button>
 
-  {#if true}
-    <div 
-      class="absolute right-0 mt-2 w-72 bg-indigo-3
-             rounded-lg shadow-2xl overflow-hidden z-10
-             text-indigo-11 flex flex-col box-border
-             container invisible group-focus-within:visible"
-      tabindex="-1"
-    >
-      <div class="p-4 focus:bg-green-7">
-        <p class="text-indigo-11">
-          Logged in as: <br>
-          <span class="text-indigo-12 text-sm">{$user?.email}</span>
-        </p>
-        <p class="text-indigo-11 mt-2">
-          User ID: <br>
-          <span class="text-indigo-12 text-sm break-words">{$user?.id}</span>
-        </p>
-      </div>
-
-      <div class="button-container">
-        <a href="/profile">
-          <div>
-            <UserIcon />
-          </div>
-          Profile
-        </a>
-        <a href="/watchlist/{$user?.id}">
-          <div>
-            <MovieIcon />
-          </div>
-          My watchlist
-        </a>
-      </div>
-
-      <div class="button-container">
-        <button>
-          <div>
-            <SettingsIcon />
-          </div>
-          Settings
-        </button>
-      </div>
-
-      <div class="button-container">
-        <!-- <Logout /> -->
-        <button on:click={handleLogout} class="">
-          <div>
-            <LogoutIcon />
-          </div>
-          Logout
-        </button>
-      </div>
+  <div 
+    class="absolute right-0 mt-2 w-72 bg-indigo-3
+            rounded-lg shadow-2xl overflow-hidden z-10
+            text-indigo-11 flex flex-col box-border
+            max-h-[calc(100vh-6rem)] overflow-y-auto
+            custom-scrollbar
+            container invisible group-focus-within:visible"
+    tabindex="-1"
+  >
+    <div class="p-4 focus:bg-green-7">
+      <p class="text-indigo-11">
+        Logged in as: <br>
+        <span class="text-indigo-12 text-sm">{$user?.email}</span>
+      </p>
+      <p class="text-indigo-11 mt-2">
+        User ID: <br>
+        <span class="text-indigo-12 text-sm break-words">{$user?.id}</span>
+      </p>
     </div>
-  {/if}
+
+    <div class="button-container">
+      <a href="/profile">
+        <div>
+          <UserIcon />
+        </div>
+        Profile
+      </a>
+      <a href="/watchlist/{$user?.id}">
+        <div>
+          <MovieIcon />
+        </div>
+        My watchlist
+      </a>
+    </div>
+
+    <div class="button-container">
+      <button>
+        <div>
+          <SettingsIcon />
+        </div>
+        Settings
+      </button>
+    </div>
+
+    <div class="button-container">
+      <!-- <Logout /> -->
+      <button on:click={handleLogout} class="">
+        <div>
+          <LogoutIcon />
+        </div>
+        Logout
+      </button>
+    </div>
+  </div>
 </div>
 
 <style lang="postcss">

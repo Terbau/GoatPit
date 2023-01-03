@@ -6,7 +6,9 @@ import {
 	getTwoRandomImdbItemsMatchingRandomGenre,
 	getTwoRandomImdbItemsIgnoreMatchingGenre,
 	insertEloMatchup,
-	updateEloItem
+	updateEloItem,
+	getTwoSimilarImdbItemsIgnoreMatchingGenre,
+	getTwoSimilarImdbItemsMatchingRandomGenre
 } from './db';
 import { roundTo } from '$lib/utils';
 
@@ -117,13 +119,14 @@ export const handleMatchupCreate = async (
 	let randomMatchup: RandomMatchup | null = null;
 	switch (compareFactorType) {
 		case 'genre':
-			randomMatchup = await getTwoRandomImdbItemsMatchingRandomGenre(
+			randomMatchup = await getTwoSimilarImdbItemsMatchingRandomGenre(
 				userId,
 				watchlistIds,
 				genreNames
 			);
+			break;
 		default:
-			randomMatchup = await getTwoRandomImdbItemsIgnoreMatchingGenre(
+			randomMatchup = await getTwoSimilarImdbItemsIgnoreMatchingGenre(
 				userId,
 				watchlistIds,
 				genreNames

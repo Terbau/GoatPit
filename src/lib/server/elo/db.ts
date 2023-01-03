@@ -192,3 +192,156 @@ export const getTwoRandomImdbItemsIgnoreMatchingGenre = async (
 		itemElo2: rows[1].eloRating,
 	};
 };
+
+
+// Gets two random IMDb items that have the same random genre.
+export const getTwoSimilarImdbItemsMatchingRandomGenre = async (
+	userId: string,
+	watchlistIds: string[],
+	genreNames: string[],
+): Promise<RandomMatchup | null> => {
+	// valid uuid
+	// userId = '00000000-0000-0000-0000-000000000000';
+
+	const rows = await db
+		.with('chosenGenre', (qb) => qb
+			.selectFrom('watchlistItem')
+			.innerJoin('watchlist', 'watchlist.id', 'watchlistItem.watchlistId')
+			.innerJoin('imdbItem', 'imdbItem.id', 'watchlistItem.imdbItemId')
+			.innerJoin('imdbItemGenre', 'imdbItemGenre.itemId', 'imdbItem.id')
+			.select('imdbItemGenre.genreName')
+			.where('watchlist.userId', '=', userId)
+			.if(watchlistIds.length > 0, (qb) => qb.where('watchlist.id', 'in', watchlistIds))
+			.if(genreNames.length > 0, (qb) => qb.where('imdbItemGenre.genreName', 'in', genreNames))
+			.groupBy('imdbItemGenre.genreName')
+			.having(sql`count(*) >= 2`)
+			.orderBy(sql`random()`)
+			.limit(1)
+			.assertType<{ genreName: string }>()
+		)
+		.with('sortedInner', (qb) => qb
+			.selectFrom("watchlistItem")
+			.innerJoin("watchlist", "watchlist.id", "watchlistItem.watchlistId")
+			.innerJoin("imdbItem", "imdbItem.id", "watchlistItem.imdbItemId")
+			.innerJoin("imdbItemGenre", "imdbItemGenre.itemId", "imdbItem.id")
+			.leftJoin('itemElo', (join) => join
+				.onRef('itemElo.imdbItemId', '=', 'imdbItem.id')
+				.on('itemElo.userId', '=', userId)
+			)
+			.select('itemElo.eloRating')
+			.select(sql<ReadableImdbItem>`row_to_json(imdb_item)`.as('imdbItem'))
+			.where('watchlist.userId', '=', userId)
+			.where('imdbItemGenre.genreName', '=', sql`(SELECT genre_name FROM chosen_genre)`)
+			.if(watchlistIds.length > 0, (qb) => qb.where('watchlist.id', 'in', watchlistIds))
+			.if(genreNames.length > 0, (qb) => qb.where('imdbItemGenre.genreName', 'in', genreNames))
+			.groupBy(['itemElo.eloRating', 'imdbItem.id'])
+			.orderBy('itemElo.eloRating')
+		)
+		.selectFrom([
+			(qe) => qe
+				.selectFrom("sortedInner")
+				.selectAll()
+				.limit(10)
+				.modifyEnd(sql`OFFSET (SELECT random() * GREATEST(count(*) - 10, 0) FROM sorted_inner)`)
+				.as("innerNested"),
+			'chosenGenre'
+		])
+		.orderBy(sql`random()`)
+		.selectAll()
+		.select("chosenGenre.genreName")
+		.limit(2)
+		.execute();
+
+	// return rows;
+
+	if (rows.length !== 2) {
+		return null;
+	}
+
+	if (rows[0].eloRating === null) {
+		const eloRating = await insertEloItem(userId, rows[0].imdbItem.id);
+		rows[0].eloRating = eloRating;
+	}
+
+	if (rows[1].eloRating === null) {
+		const eloRating = await insertEloItem(userId, rows[1].imdbItem.id);
+		rows[1].eloRating = eloRating;
+	}
+
+	return {
+		compareFactor: rows[0].genreName,
+		compareFactorType: "genre",
+		imdbItem1: rows[0].imdbItem as ReadableImdbItem,
+		imdbItem2: rows[1].imdbItem as ReadableImdbItem,
+		itemElo1: rows[0].eloRating,
+		itemElo2: rows[1].eloRating,
+	};
+};
+
+
+// Gets two random IMDb items that doesn't necessarily have the same genre.
+export const getTwoSimilarImdbItemsIgnoreMatchingGenre = async (
+	userId: string,
+	watchlistIds: string[],
+	genreNames: string[],
+): Promise<RandomMatchup | null> => {
+	// valid uuid
+	// userId = '00000000-0000-0000-0000-000000000000';
+
+	const rows = await db
+	  .with('sortedInner', (qb) => qb
+			.selectFrom("watchlistItem")
+			.innerJoin("watchlist", "watchlist.id", "watchlistItem.watchlistId")
+			.innerJoin("imdbItem", "imdbItem.id", "watchlistItem.imdbItemId")
+			.innerJoin("imdbItemGenre", "imdbItemGenre.itemId", "imdbItem.id")  // CUT??
+			.leftJoin('itemElo', (join) => join
+				.onRef('itemElo.imdbItemId', '=', 'imdbItem.id')
+				.on('itemElo.userId', '=', userId)
+			)
+			.select('itemElo.eloRating')
+			.select(sql<ReadableImdbItem>`row_to_json(imdb_item)`.as('imdbItem'))
+			.groupBy(["imdbItem.id", "itemElo.eloRating"])
+			.where("watchlist.userId", "=", userId)
+			.if(watchlistIds.length > 0, (qb) => qb.where('watchlist.id', 'in', watchlistIds))
+			.if(genreNames.length > 0, (qb) => qb.where('imdbItemGenre.genreName', 'in', genreNames))
+			.orderBy('itemElo.eloRating')
+		)
+		.selectFrom((qe) => qe
+			.selectFrom("sortedInner")
+			.selectAll()
+			.limit(10)
+			.modifyEnd(sql`OFFSET (SELECT random() * GREATEST(count(*) - 10, 0) FROM sorted_inner)`)
+			.as("innerNested")
+		)
+		.orderBy(sql`random()`)
+		.selectAll()
+		.limit(2)
+		.execute();
+
+	// return rows;
+
+	if (rows.length !== 2) {
+		return null;
+	}
+
+	// console.log(JSON.stringify(rows, null, 2))
+
+	if (rows[0].eloRating === null) {
+		const eloRating = await insertEloItem(userId, rows[0].imdbItem.id);
+		rows[0].eloRating = eloRating;
+	}
+
+	if (rows[1].eloRating === null) {
+		const eloRating = await insertEloItem(userId, rows[1].imdbItem.id);
+		rows[1].eloRating = eloRating;
+	}
+
+	return {
+		compareFactor: null,
+		compareFactorType: null,
+		imdbItem1: rows[0].imdbItem as ReadableImdbItem,
+		imdbItem2: rows[1].imdbItem as ReadableImdbItem,
+		itemElo1: rows[0].eloRating,
+		itemElo2: rows[1].eloRating,
+	};
+};

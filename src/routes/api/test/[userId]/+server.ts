@@ -1,4 +1,4 @@
-import { getTwoRandomImdbItemsMatchingRandomGenre } from '$lib/server/elo/db';
+import { getTwoRandomImdbItemsMatchingRandomGenre, getTwoSimilarImdbItemsIgnoreMatchingGenre, getTwoSimilarImdbItemsMatchingRandomGenre } from '$lib/server/elo/db';
 import { getTwoRandomImdbItemsIgnoreMatchingGenre } from '$lib/server/elo/db';
 import { json, type RequestHandler } from "@sveltejs/kit";
 
@@ -19,7 +19,7 @@ export const GET: RequestHandler = async ({ request, params }) => {
   // Test watchlistIds and genreNames
   // What happens if there arent enough matches?
 
-  const items = await getTwoRandomImdbItemsIgnoreMatchingGenre(
+  const items = await getTwoSimilarImdbItemsMatchingRandomGenre(
     userId,
     watchlistIds,
     genreNames,

@@ -3,12 +3,14 @@
 		label: string;
 		value: string;
 		selected?: boolean;
+		isReversed?: boolean;
 	}
 </script>
 
 <script lang="ts">
 	import SortLargeToSmallIcon from '../icons/SortLargeToSmallIcon.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import SortSmallToLargeIcon from '../icons/SortSmallToLargeIcon.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -16,6 +18,7 @@
 	export let options: SortOption[] = [];
 	export let value = options.find((option) => option.selected)?.value;
   export let loading = false;
+	export let isCurrentlyReversed = options.find((option) => option.value == value)?.isReversed;
 
 	if (!value) {
 		value = options[0].value;
@@ -26,10 +29,27 @@
 		sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
 	};
 
+	const dispatchSortDirectionChange = (wasReversed: boolean = false) => {
+		dispatch('sortDirectionChange', ({
+			sortDirection,
+			wasReversed,
+		}));
+	}
+
 	const handleSortDirectionButtonClick = () => {
 		toggleSortDirection();
-		dispatch('sortDirectionChange', sortDirection);
+		dispatchSortDirectionChange();
 	};
+
+	// const handleReversedSortDirectionAction = (val: string | undefined) => {
+	// 	console.log(isCurrentlyReversed)  // FIX THIS
+	// 	if (options.find((option) => option.value == val)?.isReversed == isCurrentlyReversed) return;
+
+	// 	toggleSortDirection();
+	// 	dispatchSortDirectionChange(true);
+	// };
+
+	// $: handleReversedSortDirectionAction(value);
 </script>
 
 <div class="flex flex-row w-full justify-end items-center">
@@ -43,7 +63,11 @@
       on:click={handleSortDirectionButtonClick}
       class="p-2 h-11 w-11 fill-slate-9 active:fill-slate-10 {sortDirection == 'asc' ? 'scale-y-[-1]' : ''}"
     >
-      <SortLargeToSmallIcon />
+			{#if !options.find((option) => option.value == value)?.isReversed}
+				<SortLargeToSmallIcon />
+			{:else}
+			  <SortSmallToLargeIcon />
+			{/if}
     </button>
     <select class="select" bind:value on:change>
       {#each options as option}

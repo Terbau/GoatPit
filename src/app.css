@@ -55,4 +55,8 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-indigo-8 rounded-2xl;
   }
+
+  .skeleton-bar {
+    @apply h-4 rounded-full bg-indigo-3 animate-pulse;
+  }
 }

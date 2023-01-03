@@ -56,7 +56,7 @@
     }
   };
 
-  const handleAddToWatchlist = async (entry: SearchResultEntry) => {
+  const handleAddToWatchlist = async (entry: SearchResultEntry, event: Event) => {
     if (!browser) return;
     console.log("add to watchlist", entry);
     // Close the search dropdown...
@@ -87,6 +87,9 @@
     } else {
       console.error("failed to add to watchlist");
     }
+
+    const target = event?.target as HTMLElement;
+    target?.blur();
   };
 </script>
 
@@ -122,7 +125,7 @@
                 disabled={!$user}
                 class="bg-indigo-8 text-white font-bold py-2 px-4 rounded hover:bg-indigo-9 active:bg-indigo-10
                       disabled:bg-slate-9 disabled:cursor-not-allowed"
-                on:click|stopPropagation|preventDefault={() => handleAddToWatchlist(entry)}
+                on:click|stopPropagation|preventDefault={(e) => handleAddToWatchlist(entry, e)}
               >
                 Add
               </button>

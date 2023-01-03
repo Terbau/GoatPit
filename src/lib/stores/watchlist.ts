@@ -3,6 +3,7 @@ import type { ExtendedWatchlistItem } from '$lib/server/functions';
 import { writable, type Writable } from "svelte/store";
 
 export const defaultWatchlist: Writable<ExtendedWatchlistItem[]> = writable([]);
+export const watchlistIsLoading = writable(true);
 
 export const activeWatchlistUserId = writable("");
 export const watchlistItemIsHighlighted = writable(false);
