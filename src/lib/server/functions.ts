@@ -1,9 +1,4 @@
-import {
-	getItemsByIds,
-	search,
-	type LookupResult,
-	type SearchResultEntry
-} from '@goatpit/imdb';
+import { getItemsByIds, search, type LookupResult, type SearchResultEntry } from '@goatpit/imdb';
 import { sql } from 'kysely';
 import { db } from './database';
 import type { Watchlist as DBWatchlist } from './database/types/watchlist';
@@ -15,16 +10,25 @@ export interface ExtendedIMDBItem extends IMDBItem {
 	genres: IMDBGenre[];
 	stars: IMDBStar[];
 	eloRating: number | null;
+	// eloPercentage: number | null;  // how close the rating is to the max rating currently in the database
 	requestersEloRating: number | null;
+	// requestersEloPercentage: number | null;  // how close the rating is to the max rating currently in the database
 }
 
-export interface ExtendedWatchlistItem extends WatchlistItem {
+export interface ExtendedWatchlistItem extends Omit<WatchlistItem, 'id'> {
+	id: string;
 	item: ExtendedIMDBItem;
+}
+
+export interface WatchlistUser {
+	email: string;
+	id: string;
 }
 
 export interface ExtendedWatchlist extends Omit<DBWatchlist, 'id' | 'createdAt' | 'updatedAt'> {
 	items: ExtendedWatchlistItem[];
 	id: string;
+	user: WatchlistUser;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -89,7 +93,13 @@ export const getDefaultWatchlistByUserId = async (
 		.with('swatchlist', (sw) =>
 			sw
 				.selectFrom('watchlist')
-				.selectAll()
+				.innerJoin('user', 'watchlist.userId', 'user.id')
+				.selectAll('watchlist')
+				.select(
+					sql<WatchlistUser>`json_build_object('email', "user"."email", 'id', "user"."id")`.as(
+						'user'
+					)
+				)
 				.where('userId', '=', userId)
 				.where('isDefault', '=', true)
 		)
@@ -116,6 +126,8 @@ export const getDefaultWatchlistByUserId = async (
 										.selectFrom(sql`(values (1))`.as('t')) // Hacky solution since kysely wants a FROM
 										.selectAll('imdbItem')
 										.select(['itemElo.eloRating', 'requestersElo.eloRating as requestersEloRating'])
+										// .select(sql<number>`((item_elo.elo_rating - (SELECT min_elo_rating FROM rl)) * 100) / ((SELECT max_elo_rating FROM rl) - (SELECT min_elo_rating FROM rl))`.as('eloPercentage'))
+										// .select(sql<number>`((requesters_elo.elo_rating - (SELECT min_requesters_elo_rating FROM rl)) * 100) / ((SELECT max_requesters_elo_rating FROM rl) - (SELECT min_requesters_elo_rating FROM rl))`.as('requestersEloPercentage'))
 										.select((iq) =>
 											iq
 												.selectFrom('imdbCreatorFilmography')
@@ -209,24 +221,40 @@ export const getDefaultWatchlistByUserId = async (
 						.whereNotExists((iqb) => iqb.selectFrom('swatchlist').select('id'))
 				)
 				.returningAll()
+				// .returning((qb) => )
+				.returning(sql<WatchlistUser>`(
+					SELECT json_build_object('email', "user"."email", 'id', "user"."id")
+					FROM "user" WHERE "user"."id" = ${userId}
+				)`.as('user'))
 				.returning(sql<ExtendedWatchlistItem[]>`'[]'::JSON`.as('items'))
 		)
 		.selectFrom([
-      'swatchlist',
+			// 'swatchlist',
+			(qb) =>
+				qb
+					.selectFrom('swatchlist as sw')
+					// .selectAll('swatchlist')
+					.select(['sw.id', 'sw.name', 'sw.description', 'sw.isPublic', 'sw.isDefault', 'sw.userId', 'sw.createdAt', 'sw.updatedAt', 'sw.user'])
+					.unionAll(qb.selectFrom('i').select(['i.id', 'i.name', 'i.description', 'i.isPublic', 'i.isDefault', 'i.userId', 'i.createdAt', 'i.updatedAt', 'i.user']))
+					.as('ww'),
 			(qb) =>
 				qb
 					.selectFrom('s')
 					.select('s.items')
 					.unionAll(qb.selectFrom('i').select('i.items'))
-					.as('items'),
+					.as('items')
 		])
-		.selectAll('swatchlist')
-    .select(sql<ExtendedWatchlistItem[]>`COALESCE(items.items, '[]')`.as('items'))
+		.selectAll('ww')
+		.select(sql<ExtendedWatchlistItem[]>`COALESCE(items.items, '[]')`.as('items'))
 		.executeTakeFirstOrThrow();
 
 	try {
+		// time promise
+		const start = Date.now();
 		const row = await promise;
-    console.log(JSON.stringify(row, null, 2))
+		const end = Date.now();
+		console.log(`Query took ${end - start}ms`);
+		// console.log(JSON.stringify(row, null, 2))
 		return row;
 	} catch (err) {
 		const { message } = err as Error;
@@ -434,14 +462,29 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 		watchlistId
 	}));
 
-	if (newItems.length > 0) {
-		await db.insertInto('watchlistItem').values(newItems).execute();
-	}
+	const formatted = newItems.map(
+		(item) => sql`(${item.imdbItemId}::text, ${item.watchlistId}::uuid)`
+	);
+	const statement = sql`with data(imdb_item_id, watchlist_id) as (
+			values ${sql.join(formatted)}
+		)
+		insert into watchlist_item (imdb_item_id, watchlist_id)
+		select d.imdb_item_id, d.watchlist_id
+		from data as d
+		where not exists (
+			select imdb_item_id, watchlist_id from watchlist_item as i
+			where i.imdb_item_id = d.imdb_item_id and i.watchlist_id = d.watchlist_id
+		)`;
 
+	const ret = await statement.execute(db);
+
+	// if (ret?.numAffectedRows ?? 0 > 0) {
 	const result = await getDefaultWatchlistItemsByUserId(userId, userId, {
 		imdbItemIds: addedItemIds
 	});
 	return result;
+	// }
+	// return [];
 };
 
 export const deleteItemsFromDefaultWatchlist = async (itemIds: string[]): Promise<string[]> => {

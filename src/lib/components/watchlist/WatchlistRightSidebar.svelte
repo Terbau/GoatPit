@@ -12,7 +12,7 @@
   export let loading: boolean = false;
   export let watchlistInfo: WatchlistInfo;
 
-  let imdbUserId: string | null = null;
+  let imdbUserId: string | null = 'ur154224160';
   const user = getUser();
 
 
@@ -56,15 +56,15 @@
 </script>
 
 
-<div class="h-fit w-72 shrink-0 mt-12 flex flex-col">
-  {#if $user?.id == userId}
+<div class="h-fit w-72 shrink-0 mt-4 flex flex-col">
+  <!-- {#if $user?.id == userId} -->
     <div class="flex flex-row gap-x-2 text-sm items-center mb-4">
       <i class="h-full w-8 stroke-current text-blue-11">
         <InfoIcon />
       </i>
       <p>Click an item to view options</p>
     </div>
-  {/if}
+  <!-- {/if} -->
 
   <div class="bg-indigo-4 p-4">
     {#if $watchlistIsLoading}
@@ -74,12 +74,12 @@
       </div>
     {:else}
       <h1 class="font-bold text-lg">
-        My watchlist
-        {#if isDefault}
-        <span class="text-indigo-11 text-sm font-normal"> (default)</span>
+        {watchlistInfo.name}
+        {#if watchlistInfo.isDefault}
+          <span class="text-indigo-11 text-sm font-normal"> (default)</span>
         {/if}
       </h1>
-      <p class="text-md">Created by {watchlistInfo.userId}</p>
+      <p class="text-md">User: {watchlistInfo.user.email}</p>
     {/if}
   </div>
 
@@ -97,6 +97,7 @@
           type="text"
           placeholder="IMDb watchlist"
           class="input w-full max-w-xs"
+          value="https://www.imdb.com/user/ur154224160/watchlist?sort=your_rating%2Cdesc&view=detail"
           on:input={handleInputChange}
         />
         <button class="btn btn-warning {!imdbUserId ? 'btn-disabled bg-yellow-5' : ''}">

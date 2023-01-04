@@ -4,11 +4,13 @@
 	import Watchlist from "$lib/components/watchlist/Watchlist.svelte";
 	import { activeWatchlistUserId, defaultWatchlist } from "$lib/stores/watchlist";
 	import WatchlistSidebar from "$lib/components/watchlist/WatchlistSidebar.svelte";
+	import { page } from "$app/stores";
 
   export let data: PageData;
 
   const watchlistUserId = data.userId;
-  activeWatchlistUserId.set(watchlistUserId);
+
+  $: activeWatchlistUserId.set($page.params.userId);
 
   const user = getUser();
 </script>

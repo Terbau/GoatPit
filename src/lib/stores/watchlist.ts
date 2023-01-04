@@ -4,9 +4,13 @@ import { writable, type Writable } from "svelte/store";
 
 export const defaultWatchlist: Writable<ExtendedWatchlistItem[]> = writable([]);
 export const watchlistIsLoading = writable(true);
+export const watchlistSearchKeyword = writable("");
 
 export const activeWatchlistUserId = writable("");
 export const watchlistItemIsHighlighted = writable(false);
+
+export const isEditingItems = writable(false);
+export const selectedItemIds = writable<string[]>([]);
 
 const initialWatchlistActiveGenresValue: {[genre: string]: boolean} = browser ? JSON.parse(window.localStorage.getItem("watchlistActiveGenres") || "{}") : {};
 export const watchlistActiveGenres = writable<{[genre: string]: boolean}>(initialWatchlistActiveGenresValue);

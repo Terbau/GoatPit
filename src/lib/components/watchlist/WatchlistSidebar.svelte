@@ -6,12 +6,16 @@
 	import {
 		defaultWatchlist,
 		watchlistActiveGenres,
-		watchlistIsLoading
+		watchlistIsLoading,
+		watchlistSearchKeyword
 	} from '$lib/stores/watchlist';
 	import { getUser } from '@lucia-auth/sveltekit/client';
 
 	export let userId: string;
 	const user = getUser();
+	let searchKeyword = '';
+
+	$: $watchlistSearchKeyword = searchKeyword;
 
 	let genres: string[];
 	$: genres = (() => {
@@ -33,36 +37,50 @@
 		const checked = target.checked;
 
 		if (genre === 'all') {
-      if (checked) {
-        $watchlistActiveGenres = {};
-      }
-      else {
-        $watchlistActiveGenres = Object.fromEntries(genres.map((genre) => [genre, false]));
-      }
+			if (checked) {
+				$watchlistActiveGenres = {};
+			} else {
+				$watchlistActiveGenres = Object.fromEntries(genres.map((genre) => [genre, false]));
+			}
 
-      return;
-    }
+			return;
+		}
 
 		$watchlistActiveGenres = {
 			...$watchlistActiveGenres,
 			[genre]: checked
 		};
 	};
-
-	
 </script>
 
 <div class="w-64 mt-12 shrink-0 flex flex-col gap-y-10">
 	{#if $watchlistIsLoading}
 		<div class="flex flex-col gap-y-2">
+			<div class="skeleton-bar h-8 w-1/2"></div>
 			<div class="skeleton-bar h-8"></div>
-			<div class="skeleton-bar h-8 w-3/5"></div>
-			<div class="divider animate-pulse"></div>
-			<div class="skeleton-bar h-8 w-3/5"></div>
-			<div class="skeleton-bar h-8 w-3/5"></div>
-			<div class="skeleton-bar h-8 w-3/5"></div>
 		</div>
-	{:else if genres.length >= 0 && $defaultWatchlist.length > 0}
+
+		<div class="flex flex-col gap-y-2">
+			<div class="skeleton-bar h-8" />
+			<div class="skeleton-bar h-8 w-3/5" />
+			<div class="divider animate-pulse" />
+			<div class="skeleton-bar h-8 w-3/5" />
+			<div class="skeleton-bar h-8 w-3/5" />
+			<div class="skeleton-bar h-8 w-3/5" />
+		</div>
+	{:else}
+		<div class="">
+			<h2 class="mb-1">Search items</h2>
+			<input
+				type="text"
+				placeholder="Item title..."
+				class="flex flex-row bg-indigo-3 font-normal px-4 py-2 w-full text-indigo-12 focus:ring-2 focus:ring-indigo-11 rounded-lg"
+				bind:value={searchKeyword}
+			/>
+		</div>
+	{/if}
+
+	{#if genres.length >= 0 && $defaultWatchlist.length > 0}
 		<form on:change={handleGenreChange}>
 			<h2>Genres</h2>
 			<div class="flex flex-row items-center gap-x-1 mt-2">
