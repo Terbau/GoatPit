@@ -465,7 +465,7 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 	const formatted = newItems.map(
 		(item) => sql`(${item.imdbItemId}::text, ${item.watchlistId}::uuid)`
 	);
-	const statement = sql`with data(imdb_item_id, watchlist_id) as (
+	const statement = sql<{imdbItemId: string}>`with data(imdb_item_id, watchlist_id) as (
 			values ${sql.join(formatted)}
 		)
 		insert into watchlist_item (imdb_item_id, watchlist_id)
@@ -474,17 +474,19 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 		where not exists (
 			select imdb_item_id, watchlist_id from watchlist_item as i
 			where i.imdb_item_id = d.imdb_item_id and i.watchlist_id = d.watchlist_id
-		)`;
+		)
+		returning imdb_item_id`;
 
 	const ret = await statement.execute(db);
+	const newIds = ret.rows.map((row) => row.imdbItemId);
 
-	// if (ret?.numAffectedRows ?? 0 > 0) {
-	const result = await getDefaultWatchlistItemsByUserId(userId, userId, {
-		imdbItemIds: addedItemIds
-	});
-	return result;
-	// }
-	// return [];
+	if (newIds.length > 0) {
+		const result = await getDefaultWatchlistItemsByUserId(userId, userId, {
+			imdbItemIds: newIds
+		});
+		return result;
+	}
+	return [];
 };
 
 export const deleteItemsFromDefaultWatchlist = async (itemIds: string[]): Promise<string[]> => {

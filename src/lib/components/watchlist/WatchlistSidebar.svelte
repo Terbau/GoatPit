@@ -70,10 +70,10 @@
 		</div>
 	{:else}
 		<div class="">
-			<h2 class="mb-1">Search items</h2>
+			<h2 class="mb-1 ml-1">Find item in list</h2>
 			<input
 				type="text"
-				placeholder="Item title..."
+				placeholder="Item title"
 				class="flex flex-row bg-indigo-3 font-normal px-4 py-2 w-full text-indigo-12 focus:ring-2 focus:ring-indigo-11 rounded-lg"
 				bind:value={searchKeyword}
 			/>
@@ -87,7 +87,7 @@
 				<input
 					type="checkbox"
 					value="all"
-					class="checkbox checkbox-primary"
+					class="checkbox checkbox-info"
 					checked={!genres.some(
 						(genre) => ![undefined, true].includes($watchlistActiveGenres[genre])
 					)}
@@ -102,7 +102,7 @@
 							type="checkbox"
 							value={genre}
 							checked={[undefined, true].includes($watchlistActiveGenres[genre])}
-							class="checkbox checkbox-primary"
+							class="checkbox checkbox-info"
 						/>
 						<span class="label-text">{genre}</span>
 					</li>

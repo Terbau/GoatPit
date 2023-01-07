@@ -11,7 +11,7 @@
 	handleSession(page);
 </script>
 
-<div class="bg-indigo-1 w-full min-h-screen text-indigo-12 flex flex-col">
+<div class="test w-full min-h-screen text-indigo-12 flex flex-col">
   <div class="mt-16"></div>
   <Navbar />
   <LoginModal />
@@ -20,3 +20,14 @@
   <div class="mt-16"></div>
   <Footer />
 </div>
+
+<style lang="postcss">
+  .test {
+    background-image: 
+      radial-gradient( circle 710px at 5.2% calc(100vh),  rgb(4, 7, 97) 0%, transparent 97.5% ),
+      /* radial-gradient( circle 610px at 90.2% calc(20vh),  rgba(5,8,114,1) 0%, transparent 97.5% ), */
+      /* radial-gradient( circle 610px at 5.2% calc(280vh),  rgba(5,8,114,1) 0%, transparent 97.5% ), */
+      radial-gradient( circle 710px at 90.2% calc(20vh),  rgb(4, 7, 97) 0%, rgb(7, 3, 53) 97.5% );
+    /* background-repeat: repeat; */
+  }
+</style>

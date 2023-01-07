@@ -3,9 +3,11 @@
 	import TwitterIcon from "../icons/TwitterIcon.svelte";
 
 </script>
-<div class="w-full bg-indigo-4 mt-auto flex flex-col text-indigo-12 box-border p-16 justify-center gap-y-6">
+
+<!-- bg-[rgba(7,3,53,1)] -->
+<div class="w-full bg-black/20 border-t border-blue-8 mt-auto flex flex-col text-indigo-12 box-border p-16 justify-center gap-y-6">
   <div class="flex flex-col text-center">
-    <h3 class="font-bold text-[#7a93fa]">Resources provided by</h3>
+    <h3 class="font-bold text-blue-11">Resources provided by</h3>
     <div class="flex flex-row justify-center gap-x-4">
       <a href="https://icons8.com" class="">Icons8</a>
       <a href="https://fontawesome.com/">Font Awesome</a>
@@ -31,7 +33,7 @@
 
 <style lang="postcss">
   a {
-    @apply text-indigo-11 hover:underline;
+    @apply text-blue-11 hover:underline;
   }
 
   .icon-container a {

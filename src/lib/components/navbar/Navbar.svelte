@@ -9,7 +9,7 @@
 </script>
 
 <nav class="fixed top-0 flex flex-row items-center w-full h-16 px-16
-            border-b border-solid border-indigo-8 bg-inherit z-10"
+            border-b border-solid border-blue-8 bg-[rgba(7,3,53,1)] z-10"
 >
   <a href="/" class="flex flex-row items-center text-3xl mr-5">
     <img src="/images/goat.png" class="mr-3 h-10" alt="Logo" />

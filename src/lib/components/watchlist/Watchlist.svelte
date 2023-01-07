@@ -10,7 +10,8 @@
 
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import type { ExtendedWatchlist, ExtendedWatchlistItem } from '$lib/server/functions';
 	import {
 		watchlistSortDirection,
@@ -19,15 +20,19 @@
 		watchlistIsLoading,
 		watchlistSearchKeyword,
 		isEditingItems,
-		selectedItemIds
+		selectedItemIds,
+		defaultWatchlist
 	} from '$lib/stores/watchlist';
 	import { getUser } from '@lucia-auth/sveltekit/client';
+	import { onDestroy } from 'svelte';
 	import type { Writable } from 'svelte/store';
+	import DeleteIcon from '../icons/DeleteIcon.svelte';
 	import InfoIcon from '../icons/InfoIcon.svelte';
 	import RegularEditIcon from '../icons/RegularEditIcon.svelte';
 	import SolidEditIcon from '../icons/SolidEditIcon.svelte';
 	import SortSelect, { type SortOption } from '../input/SortSelect.svelte';
 	import SkeletonWatchlistItem from './SkeletonWatchlistItem.svelte';
+	import WatchlistEditMultiple from './WatchlistEditMultiple.svelte';
 	import WatchlistItem from './WatchlistItem.svelte';
 	import WatchlistRightSidebar from './WatchlistRightSidebar.svelte';
 
@@ -42,9 +47,14 @@
 	let watchlistInfo: WatchlistInfo;
 	let eloRatingStats: EloRatingStats;
 
+	const _sort = $page.url.searchParams.get('sort');
+	const _order = $page.url.searchParams.get('order');
+	if (_sort) watchlistSortOption.set(_sort);
+	if (_order) watchlistSortDirection.set(_order);
+
 	$: watchlistIsLoading.set(loading && isNavigateLoading);
 
-	items.subscribe((value) => {
+	const unsubscribe = items.subscribe((value) => {
 		let minER = value[0]?.item.eloRating ?? 0;
 		let maxER = value[0]?.item.eloRating ?? 0;
 		let minRER = value[0]?.item.requestersEloRating ?? 0;
@@ -80,6 +90,14 @@
 		params.append('orderBy', $watchlistSortOption);
 		params.append('orderDirection', $watchlistSortDirection);
 
+		$page.url.searchParams.set('sort', $watchlistSortOption);
+		$page.url.searchParams.set('order', $watchlistSortDirection);
+		goto(`?${$page.url.searchParams.toString()}`, {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true,
+		})
+
 		const resp = await fetch(`http://127.0.0.1:5173/api/user/${userId}/watchlist?` + params);
 		const resultData: ExtendedWatchlist = await resp.json();
 
@@ -90,7 +108,12 @@
 		initialHasLoaded = true;
 	};
 
-	afterNavigate(() => {
+	afterNavigate((navigation) => {
+		if (navigation.type == 'goto') {
+			console.log('Goto');
+			return;
+		}
+
 		fetchAndSetItems(true);
 		console.log('Navigate');
 	});
@@ -125,6 +148,10 @@
 
 		if (!e.detail.wasReversed) fetchAndSetItems();
 	};
+
+	onDestroy(() => {
+		unsubscribe();
+	});
 </script>
 
 <div class="flex flex-row gap-x-10 grow mt-[-1rem]">
@@ -134,69 +161,8 @@
 				? ''
 				: 'invisible'}"
 		>
-			<div class="flex flex-row h-full gap-x-6 grow {loading ? 'invisible' : ''}">
-				<div
-					class="tooltip h-full flex items-end {$isEditingItems ? 'tooltip-left' : 'tooltip-left'}"
-					data-tip="Edit items"
-				>
-					<button
-						class="h-[2.5rem] w-[2.5rem] ml-2 {$isEditingItems
-							? 'fill-indigo-11'
-							: 'fill-slate-9'}"
-						on:click={() => {
-							isEditingItems.update((value) => !value);
-						}}
-					>
-						{#if $isEditingItems}
-							<SolidEditIcon />
-						{:else}
-							<RegularEditIcon />
-						{/if}
-					</button>
-				</div>
+			<WatchlistEditMultiple loading={loading} items={items} />
 
-				{#if $isEditingItems}
-				<div class="dropdown dropdown-hover dropdown-bottom flex">
-					<label tabindex="-1" for="" class="translate-y-[0.25rem] rounded-lg px-4 py-3 bg-base-100 hover:bg-base-200 cursor-pointer">Actions</label>
-					<ul tabindex="-1" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-						<li>
-							<button>Test</button>
-						</li>
-						<li>
-							<button>Test2</button>
-						</li>
-					</ul>
-				</div>
-
-					<div class="flex flex-col gap-y-1">
-						<p class="text-sm text-slate-9 whitespace-nowrap">Selected {$selectedItemIds.length} of {$items.length}</p>
-
-						<div class="flex flex-row gap-x-2">
-							<input
-								type="checkbox"
-								class="checkbox checkbox-primary"
-								checked={$selectedItemIds.length === $items.length}
-								on:change={() => {
-									if ($selectedItemIds.length === $items.length) {
-										selectedItemIds.set([]);
-									} else {
-										selectedItemIds.set($items.map((item) => item.id));
-									}
-								}}
-							/>
-							<span class="whitespace-nowrap">Select all</span>
-						</div>
-						
-					</div>
-
-					
-				{/if}
-			</div>
-
-			<!-- {#if loading || $items.length > 0} -->
-			<!-- <button class="bordered-button-indigo w-72">
-					Import from IMDb
-				</button> -->
 			<SortSelect
 				sortDirection={$watchlistSortDirection}
 				options={sortOptions}
@@ -217,7 +183,7 @@
 			</ul>
 		{:else if $items.length > 0 && !loading}
 			<ul class="flex flex-col gap-4 grow">
-				{#each $items as item (item.id)}
+				{#each $items as item (item.item.id)}
 					{#if item.item.genres.some( (genre) => [undefined, true].includes($watchlistActiveGenres[genre.name]) ) && item.item.title
 							.toLocaleLowerCase()
 							.includes($watchlistSearchKeyword.toLocaleLowerCase())}
@@ -232,6 +198,3 @@
 
 	<WatchlistRightSidebar {isDefault} {userId} {loading} {watchlistInfo} />
 </div>
-
-<style lang="postcss">
-</style>

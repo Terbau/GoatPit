@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
+	import { onDestroy } from "svelte";
 	import CloseIcon from "../icons/CloseIcon.svelte";
 
   export let visible = false;
@@ -13,15 +14,19 @@
     }
   };
 
-  store?.subscribe((v) => {
+  const unsubscribe = store?.subscribe((v) => {
     visible = v;
+  });
+
+  onDestroy(() => {
+    unsubscribe?.();
   });
 </script>
 
 <div class="cursor-default {visible ? '' : 'hidden'}">
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
-    class="z-20 absolute bg-black/50 inset-x-0 inset-y-0"
+    class="z-20 fixed bg-black/50 inset-x-0 inset-y-0"
     on:click|self|stopPropagation="{toggle}"
   ></div>
   <div class="z-20 absolute inset-x-0 inset-y-0 top-[5%] mx-auto w-fit h-fit bg-indigo-2

@@ -5,7 +5,7 @@
 
 @layer components {
   .bordered-button-indigo {
-    @apply px-8 py-2 rounded-md text-indigo-11 border border-solid border-indigo-7 hover:border-indigo-8
+    @apply px-8 py-2 rounded-md text-blue-11 border border-solid border-blue-7 hover:border-blue-8
   }
 
   .bordered-button-red {
@@ -58,5 +58,22 @@
 
   .skeleton-bar {
     @apply h-4 rounded-full bg-indigo-3 animate-pulse;
+  }
+
+  .blue-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-9 via-blue-11 to-blue-9 w-fit;
+  }
+
+  .hover-slide-underline {
+    @apply relative;
+  }
+
+  .hover-slide-underline:after {
+    @apply absolute w-full h-0.5 bottom-0 left-0 bg-blue-9 scale-x-0 origin-bottom-right transition-transform duration-300;
+    content: '';
+  }
+
+  .hover-slide-underline:hover:after {
+    @apply origin-bottom-left scale-x-100;
   }
 }

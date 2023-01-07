@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
 	import { addAlert } from "$lib/stores/alert";
-	import { activeWatchlistUserId, prependToWatchlist, watchlistIsLoading } from "$lib/stores/watchlist";
+	import { activeWatchlistUserId, defaultWatchlist, prependToWatchlist, watchlistIsLoading } from "$lib/stores/watchlist";
 	import { getUser } from "@lucia-auth/sveltekit/client";
 	import InfoIcon from "../icons/InfoIcon.svelte";
 	import InfoTooltip from "../tooltip/InfoTooltip.svelte";
@@ -45,6 +45,7 @@
 			if ($activeWatchlistUserId == $user?.id) {
 				const respData = await resp.json();
 				prependToWatchlist(respData.newItems);
+        // defaultWatchlist.update((items) => [...respData.newItems, ...items])
 				addAlert({
 					type: 'success',
 					message: `Imported IMDb watchlist items`
@@ -66,7 +67,7 @@
     </div>
   <!-- {/if} -->
 
-  <div class="bg-indigo-4 p-4">
+  <div class="bg-indigo-6 p-4 shadow-2xl">
     {#if $watchlistIsLoading}
       <div class="flex flex-col gap-y-2">
         <div class="skeleton-bar w-2/3 bg-indigo-3" />

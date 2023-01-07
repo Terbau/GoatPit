@@ -5,8 +5,9 @@ import type { PageLoad } from './$types';
 
 export interface Watchlist {}
 
-export const load: PageLoad = async ({ fetch, params }) => {
+export const load: PageLoad = async ({ params}) => {
   const userId = params.userId;
+
 
   // const items = await getDefaultWatchlistItemsByUserId(userId);
 

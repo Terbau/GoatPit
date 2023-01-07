@@ -58,7 +58,7 @@
 	};
 </script>
 
-<div class="mx-auto mt-10 w-3/5 flex flex-col items-center">
+<div class="mx-auto mt-16 w-3/5 flex flex-col items-center">
 	<h1 class="text-2xl font-bold">AutoRank - Setup</h1>
 
 	<!-- <p>Before starting the game, please configure how you want the game to behave.</p> -->

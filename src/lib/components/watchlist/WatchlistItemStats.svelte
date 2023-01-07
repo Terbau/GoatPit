@@ -16,7 +16,7 @@
 	let eloRating = imdbItem.eloRating ?? 0;
 	let eloPercentage = hasEloRating
 		? Math.floor(((eloRating - ers.min) * 100) / (ers.max - ers.min))
-		: 0;
+		: 100;
 	let readableEloRating = hasEloRating ? Math.floor(eloRating) : 'Not rated';
 
 	let hasRequestersEloRating = imdbItem.requestersEloRating !== null;
@@ -40,31 +40,33 @@
 		</div>
 		<div class="tooltip" data-tip="Elo compared to the min and max in your list">
 			<div class="radial-progress text-blue-indigo" style="--size:3.5rem; --value:{eloPercentage};">
-				{eloPercentage}%
+				{hasEloRating ? eloPercentage+'%' : 'N/A'}
 			</div>
 		</div>
 	</div>
 
 	<div class="stat-container rounded-b-xl">
-		<!-- {#if $user?.id !== $activeWatchlistUserId} -->
-		<div
-			class="flex flex-col items-start {$user?.id === $activeWatchlistUserId ? 'invisible' : ''}"
-		>
-			<h3>Your Elo Rating</h3>
-			<p>{readableRequestersEloRating}</p>
-		</div>
-		<div
-			class="tooltip {$user?.id === $activeWatchlistUserId ? 'invisible' : ''}"
-			data-tip="Elo compared to the min and max in your list"
-		>
+		{#if $user?.id !== $activeWatchlistUserId}
 			<div
-				class="radial-progress text-blue-indigo"
-				style="--size:3.5rem; --value:{requestersEloPercentage};"
+				class="flex flex-col items-start {$user?.id === $activeWatchlistUserId ? 'invisible' : ''}"
 			>
-				{requestersEloPercentage}%
+				<h3>Your Elo Rating</h3>
+				<p>{readableRequestersEloRating}</p>
 			</div>
-		</div>
-		<!-- {/if} -->
+			<div
+				class="tooltip {$user?.id === $activeWatchlistUserId ? 'invisible' : ''}"
+				data-tip="Elo compared to the min and max in your list"
+			>
+				<div
+					class="radial-progress text-blue-indigo"
+					style="--size:3.5rem; --value:{requestersEloPercentage};"
+				>
+					{requestersEloPercentage}%
+				</div>
+			</div>
+		{:else}
+			<div class="text-xl text-center w-full">-------</div>
+		{/if}
 	</div>
 </div>
 
@@ -75,11 +77,11 @@
 	}
 
 	.stat-container {
-		@apply flex flex-row items-center gap-y-1 grow bg-indigo-5 justify-between px-3;
+		@apply flex flex-row items-center h-full gap-y-1 bg-indigo-5 justify-between px-3 grow-0;
 	}
 
 	.stat-container > div {
-		@apply text-blue-indigo;
+		@apply text-blue-indigo ;
 	}
 
 	.stat-container > div > p {

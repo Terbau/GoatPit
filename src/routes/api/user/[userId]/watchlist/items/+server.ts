@@ -75,9 +75,9 @@ export const DELETE: RequestHandler = async ({ params, request, locals }) => {
     throw error(400, "Invalid request body");
   }
 
-  if (itemIds.length === 0 || itemIds.length > 100) { 
-    throw error(400, "Invalid few or too many items (max 100)");
-  }
+  // if (itemIds.length === 0 || itemIds.length > 100) { 
+  //   throw error(400, "Invalid few or too many items (max 100)");
+  // }
 
   const result = await deleteItemsFromDefaultWatchlist(itemIds);
 

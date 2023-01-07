@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { beforeNavigate } from '$app/navigation';
+	import { updated } from '$app/stores';
 	import type { ExtendedWatchlistItem } from '$lib/server/functions';
 	import { addAlert } from '$lib/stores/alert';
 	import {
@@ -12,6 +13,7 @@
 	} from '$lib/stores/watchlist';
 	import { transformImdbImageSize } from '$lib/utils';
 	import { getUser } from '@lucia-auth/sveltekit/client';
+	import { onDestroy } from 'svelte';
 	import FilledStarIcon from '../icons/FilledStarIcon.svelte';
 	import ImdbIcon from '../icons/ImdbIcon.svelte';
 	import type { EloRatingStats } from './Watchlist.svelte';
@@ -28,11 +30,11 @@
 	const user = getUser();
 	let transformActive = false;
 
-	selectedItemIds.subscribe((value) => {
+	const unsubscribe1 = selectedItemIds.subscribe((value) => {
 		isSelected = value.includes(item.id);
 	});
 
-	watchlistItemIsHighlighted.subscribe((value) => {
+	const unsubscribe2 = watchlistItemIsHighlighted.subscribe((value) => {
 		if (!value) transformActive = value;
 	});
 
@@ -79,6 +81,11 @@
 			});
 		}
 	};
+
+	onDestroy(() => {
+		unsubscribe1();
+		unsubscribe2();
+	});
 </script>
 
 <li
@@ -109,8 +116,8 @@
 			transformActive = !transformActive;
 			watchlistItemIsHighlighted.set(transformActive);
 		}}
-		class="flex flex-row h-48 w-full shrink-0 rounded-xl bg-indigo-5
-					{isSelected ? 'ring-4 ring-solid ring-indigo-10' : ''}
+		class="flex flex-row h-48 w-full shrink-0 rounded-xl bg-indigo-6
+					{$isEditingItems && isSelected ? 'ring-4 ring-solid ring-red-10' : ''}
 					{$isEditingItems && !isSelected ? 'hover:ring-4 active:ring-4 ring-solid hover:ring-indigo-11 active:ring-indigo-10' : ''}"
 	>
 		<img
@@ -136,7 +143,7 @@
 						</span>
 					</div>
 					<div class="tooltip flex flex-row w-fit items-center h-full fill-yellow-9 gap-x-1" data-tip="IMDb Rating">
-						<span class="text-yellow-9 text-md font-bold">{imdbItem.starRating}</span>
+						<span class="text-yellow-9 text-md font-bold">{imdbItem.starRating.toFixed(1)}</span>
 						<!-- <FilledStarIcon /> -->
 					</div>
 				</div>
