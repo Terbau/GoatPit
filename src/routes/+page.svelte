@@ -8,7 +8,7 @@
 	const user = getUser();
 </script>
 
-<div class="min-h-screen box-content mt-16 mb-8 flex flex-col w-full xl:mb-32">
+<div class="min-h-screen box-content mt-16 mb-8 flex flex-col w-full xl:mb-16">
 	<div class="flex flex-col items-center mx-auto mt-[5vh] mb-32">
 		<div class="max-w-[95%] md:max-w-md lg:max-w-2xl flex flex-col items-center px-10 gap-y-4">
 			<h1

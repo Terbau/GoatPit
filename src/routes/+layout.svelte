@@ -30,6 +30,7 @@
       /* radial-gradient( circle 610px at 90.2% calc(20vh),  rgba(5,8,114,1) 0%, transparent 97.5% ), */
       /* radial-gradient( circle 610px at 5.2% calc(280vh),  rgba(5,8,114,1) 0%, transparent 97.5% ), */
       radial-gradient( circle 710px at 90.2% calc(20vh),  rgb(4, 7, 97) 0%, rgb(7, 3, 53) 97.5% );
-    /* background-repeat: repeat; */
+
+    background-attachment: fixed;
   }
 </style>
