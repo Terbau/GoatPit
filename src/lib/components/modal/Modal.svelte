@@ -2,6 +2,7 @@
   import type { Writable } from "svelte/store";
 	import { onDestroy } from "svelte";
 	import CloseIcon from "../icons/CloseIcon.svelte";
+	import { browser } from "$app/environment";
 
   export let visible = false;
   export let store: Writable<boolean> | null = null;
@@ -21,9 +22,16 @@
   onDestroy(() => {
     unsubscribe?.();
   });
+
+  let classes = 'hidden';
+  $: if (browser && visible) {
+    classes = '';
+  } else if (browser && !visible) {
+    classes = 'hidden';
+  }
 </script>
 
-<div class="cursor-default {visible ? '' : 'hidden'}">
+<div class="cursor-default {classes}">
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
     class="z-20 fixed bg-black/50 inset-x-0 inset-y-0"

@@ -10,11 +10,19 @@
 	import GoogleIcon from "../icons/GoogleIcon.svelte";
 	import TwitterIcon from "../icons/TwitterIcon.svelte";
 	import { browser } from "$app/environment";
+	import { page } from "$app/stores";
+	import { getUser } from "@lucia-auth/sveltekit/client";
 
   beforeNavigate(() => {
     closeModal(loginModalOpen);
     console.log("Closed modal");
   });
+
+  const user = getUser();
+
+  if (!$user && $page.url.searchParams.has('login')) {
+    loginModalOpen.set(true);
+  }
 
   let email: string;
   let password: string;

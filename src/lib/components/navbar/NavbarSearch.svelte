@@ -93,7 +93,7 @@
   };
 </script>
 
-<div class="min-w-[10rem] max-w-[40rem] grow box-border ml-auto relative group">
+<div class="w-full grow box-border relative group">
   <LoadingSearchInput
     props={{ placeholder: "Search" }}
     bind:value={searchValue}

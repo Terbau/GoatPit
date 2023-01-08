@@ -7,6 +7,7 @@
 	import { handleSession } from '@lucia-auth/sveltekit/client';
 	import AlertContainer from "$lib/components/alert/AlertContainer.svelte";
 	import Footer from "$lib/components/footer/Footer.svelte";
+	import NavSidebar from "$lib/components/navbar/NavSidebar.svelte";
 
 	handleSession(page);
 </script>
@@ -14,6 +15,7 @@
 <div class="test w-full min-h-screen text-indigo-12 flex flex-col">
   <div class="mt-16"></div>
   <Navbar />
+  <!-- <NavSidebar /> -->
   <LoginModal />
   <AlertContainer />
   <slot></slot>

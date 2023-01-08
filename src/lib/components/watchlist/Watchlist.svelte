@@ -109,7 +109,8 @@
 	};
 
 	afterNavigate((navigation) => {
-		if (navigation.type == 'goto') {
+		console.log(navigation.from?.url, $page.url)
+		if (navigation.type == 'goto' && navigation.from?.url.pathname == $page.url.pathname) {
 			console.log('Goto');
 			return;
 		}

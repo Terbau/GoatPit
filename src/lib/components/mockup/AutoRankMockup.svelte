@@ -84,7 +84,7 @@
   {#await preloadAllImages()}
     <!-- Loading... -->
   {:then}
-    <h1 class="font-bold text-xl">Which movie is better?</h1>
+    <h1 class="font-bold text-lg md:text-xl">Which movie is better?</h1>
     <div class="movie-container flex flex-row">
       <div
         class="movie rounded-l-2xl flex-row {item1Classes}"
@@ -92,7 +92,7 @@
         <img transition:fade src={items[currentIndex].url} alt="" />
         <div>
           <h2>{items[currentIndex].name}</h2>
-          <p class="text-sm">1000</p>
+          <p>1000</p>
         </div>
       </div>
 
@@ -104,7 +104,7 @@
         <img transition:fade src={items[currentIndex + 1].url} alt="" />
         <div>
           <h2>{items[currentIndex + 1].name}</h2>
-          <p class="text-sm">1000</p>
+          <p>1000</p>
         </div>
       </div>
     </div>
@@ -122,7 +122,7 @@
 	}
 
 	.movie {
-		@apply flex h-32 w-screen max-w-[14rem] min-w-min bg-base-200 overflow-hidden transition duration-500 shadow-2xl;
+		@apply flex h-16 md:h-32 w-screen max-w-[7rem] md:max-w-[14rem] min-w-min bg-base-200 overflow-hidden transition duration-500 shadow-2xl;
 	}
 
 	.movie > div {
@@ -130,10 +130,14 @@
 	}
 
 	.movie h2 {
-		@apply font-bold text-lg;
+		@apply font-bold text-[0.6rem] md:text-lg whitespace-nowrap;
 	}
 
+  .movie p {
+    @apply text-[0.4rem] md:text-sm;
+  }
+
 	.movie-container img {
-		@apply object-fill shrink-0 h-32 w-[5.5rem];
+		@apply object-fill shrink-0 w-[2.75rem] md:w-[5.5rem];
 	}
 </style>
