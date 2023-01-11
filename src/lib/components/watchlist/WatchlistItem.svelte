@@ -2,10 +2,11 @@
 	import { browser } from '$app/environment';
 	import { beforeNavigate } from '$app/navigation';
 	import { updated } from '$app/stores';
-	import type { ExtendedWatchlistItem } from '$lib/server/functions';
+	import type { ExtendedWatchlistItem } from '$lib/server/watchlist/types';
 	import { addAlert } from '$lib/stores/alert';
 	import {
 		activeWatchlistUserId,
+		activeWatchlistId,
 		isEditingItems,
 		removeFromWatchlist,
 		selectedItemIds,
@@ -24,7 +25,8 @@
 	export let eloRatingStats: EloRatingStats;
 	export let userId = '';
 	export let isSelected = false;
-
+	// TODO: Add miniSeries or whatever its called to imdb
+	// TODO: Check out letterboxd api
 	const imdbItem = item.item;
 
 	const user = getUser();
@@ -57,7 +59,7 @@
 
 		const itemIds = [item.id];
 
-		const resp = await fetch(`/api/user/${userId}/watchlist/items`, {
+		const resp = await fetch(`/api/user/${userId}/watchlist/${$activeWatchlistId}/items`, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json'
@@ -89,7 +91,7 @@
 </script>
 
 <li
-	class="relative flex justify-center ease-in-out duration-75 w-full 
+	class="relative flex justify-center ease-in-out duration-75
 	{transformActive ? 'scale-110 z-30 translate-x-[calc((15%+3px)*-1)]' : ''}"
 >
 	{#if $user?.id == userId}
@@ -116,30 +118,34 @@
 			transformActive = !transformActive;
 			watchlistItemIsHighlighted.set(transformActive);
 		}}
-		class="flex flex-row h-48 w-full shrink-0 rounded-xl bg-indigo-6
+		class="grid h-24 sm:h-48 rounded-xl bg-indigo-6 grid-cols-[4rem_1fr] sm:grid-cols-[8rem_1fr] overflow-hidden
 					{$isEditingItems && isSelected ? 'ring-4 ring-solid ring-red-10' : ''}
 					{$isEditingItems && !isSelected ? 'hover:ring-4 active:ring-4 ring-solid hover:ring-indigo-11 active:ring-indigo-10' : ''}"
 	>
 		<img
-			class="h-48 w-32 object-fill shrink-0 rounded-l-xl"
+			class="h-24 sm:h-48 object-fill rounded-l-xl"
 			src={transformImdbImageSize(imdbItem.imageUrl, 300)}
 			loading="lazy"
 			alt=""
 		/>
 		<div class="flex flex-col px-4 py-2 grow box-border text-left h-full">
-			<div class="flex flex-row items-center gap-x-1">
-				<span class="tooltip" data-tip={imdbItem.title}>
-					<h2 class="text-indigo-12 text-lg font-bold truncate max-w-[21rem]">
-						{imdbItem.title}
-					</h2>
-				</span>
-				<p class="shrink-0 text-indigo-11 text-sm">({imdbItem.yearReleased})</p>
-				<div class="ml-auto flex flex-row h-full items-center gap-x-2">
-					<div class="tooltip" data-tip="Elo Rating">
+			<div class="grid items-center gap-x-1 grid-cols-[minmax(0,max-content)_1fr_2fr]">
+
+				<!-- <div class="flex flex-row items-center gap-x-1"> -->
+					<!-- <span title={imdbItem.title} class="tooltip truncate" data-tip={imdbItem.title}> -->
+				<h2 title={imdbItem.title} class="text-indigo-12 text-md sm:text-lg font-bold truncate">
+					{imdbItem.title}
+				</h2>
+					<!-- </span> -->
+				<p class="text-indigo-11 text-sm mr-auto">({imdbItem.yearReleased})</p>
+				<!-- </div> -->
+
+				<div class="flex flex-row h-full items-center gap-x-2 ml-auto shrink-0">
+					<div class="tooltip" data-tip="Elo Rating{imdbItem.eloRating !== null ? '' : ' (Not rated)'}">
 						<span
-							class="text-md font-bold bg-gradient-to-r from-indigo-11 to-blue-11  bg-clip-text text-transparent"
+							class="text-md font-bold bg-gradient-to-r from-indigo-11 to-blue-11 bg-clip-text text-transparent whitespace-nowrap content:['test']"
 						>
-							{imdbItem.eloRating !== null ? Math.floor(imdbItem.eloRating) : 'Not rated'}
+							{imdbItem.eloRating !== null ? Math.floor(imdbItem.eloRating) : 'NR'}
 						</span>
 					</div>
 					<div class="tooltip flex flex-row w-fit items-center h-full fill-yellow-9 gap-x-1" data-tip="IMDb Rating">
@@ -152,8 +158,8 @@
 				</div> -->
 			</div>
 
-			<p class="text-sm mt-[-0.25rem]">{imdbItem.genres.map((c) => c.name).join(', ')}</p>
-			<p class="mt-2">{imdbItem.plot}</p>
+			<p class="text-xs sm:text-sm mt-[-0.25rem]">{imdbItem.genres.map((c) => c.name).join(', ')}</p>
+			<p class="mt-2 text-sm sm:text-base overflow-hidden text-ellipsis">{imdbItem.plot}</p>
 
 			<!-- <div class="mt-auto">
         <p class="text-right text-sm">Click to {transformActive ? 'close' : 'view'} options</p>

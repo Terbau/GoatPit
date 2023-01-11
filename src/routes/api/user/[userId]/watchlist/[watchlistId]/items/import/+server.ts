@@ -1,9 +1,10 @@
-import { addItemsToDefaultWatchlistIfNotExists } from '$lib/server/functions';
+import { addItemsToWatchlistIfNotExists } from '$lib/server/watchlist/functions';
 import { getRawWatchlistByUserId, getWatchlistByUserId } from '@goatpit/imdb';
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 
 export const POST: RequestHandler = async ({ request, locals, params }) => {
   const userId = params.userId;
+  const watchlistId = params.watchlistId ?? 'watchlist';
   const session = await locals.validate();
 
   if (!session) {
@@ -23,7 +24,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
   const items = await getRawWatchlistByUserId(imdbUserId);
   const itemIds = items.map((item) => item.imdbItemId);
 
-  const result = await addItemsToDefaultWatchlistIfNotExists(userId, itemIds);
+  const result = await addItemsToWatchlistIfNotExists(userId, watchlistId, itemIds);
 
   return json({
     result: "success",

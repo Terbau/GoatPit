@@ -5,7 +5,8 @@ export interface Watchlist {
   name: string;
   description: string;
   isPublic: boolean;
-  isDefault: boolean;  // Whether or not this watchlist is created by default
+  isDefaultWatchlist: boolean;
+  isDefaultTowatchlist: boolean;
   userId: string;
   createdAt: Generated<Date>;
   updatedAt: Generated<Date>;

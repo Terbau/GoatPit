@@ -1,56 +1,29 @@
 import { getItemsByIds, search, type LookupResult, type SearchResultEntry } from '@goatpit/imdb';
 import { sql } from 'kysely';
-import { db } from './database';
-import type { Watchlist as DBWatchlist } from './database/types/watchlist';
-import type { IMDBCreator, IMDBGenre, IMDBItem, IMDBStar } from './database/types/imdb';
-import type { WatchlistItem } from './database/types/watchlist';
-
-export interface ExtendedIMDBItem extends IMDBItem {
-	creators: IMDBCreator[];
-	genres: IMDBGenre[];
-	stars: IMDBStar[];
-	eloRating: number | null;
-	// eloPercentage: number | null;  // how close the rating is to the max rating currently in the database
-	requestersEloRating: number | null;
-	// requestersEloPercentage: number | null;  // how close the rating is to the max rating currently in the database
-}
-
-export interface ExtendedWatchlistItem extends Omit<WatchlistItem, 'id'> {
-	id: string;
-	item: ExtendedIMDBItem;
-}
-
-export interface WatchlistUser {
-	email: string;
-	id: string;
-}
-
-export interface ExtendedWatchlist extends Omit<DBWatchlist, 'id' | 'createdAt' | 'updatedAt'> {
-	items: ExtendedWatchlistItem[];
-	id: string;
-	user: WatchlistUser;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-export interface GetItemsOptions {
-	itemIds?: string[] | undefined;
-	imdbItemIds?: string[] | undefined;
-	orderBy?: string | undefined;
-	orderDirection?: string | undefined;
-}
+import { db } from '../database';
+import type { IMDBCreator, IMDBGenre, IMDBItem, IMDBStar } from '../database/types/imdb';
+import type { WatchlistItem, Watchlist as DBWatchlist } from '../database/types/watchlist';
+import type { ExtendedIMDBItem, ExtendedWatchlist, ExtendedWatchlistItem, GetItemsOptions, ReadableDBWatchlist, WatchlistUser } from './types';
 
 // Custom exception
-class NotFoundError extends Error {
+export class UserNotFoundError extends Error {
 	constructor(message: string) {
 		super(message);
-		this.name = 'NotFoundError';
+		this.name = 'UserNotFoundError';
 	}
 }
 
-export const getDefaultWatchlistByUserId = async (
+export class WatchlistNotFoundError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'WatchlistNotFoundError';
+	}
+}
+
+export const getWatchlistByUserId = async (
 	userId: string,
 	requesterUserId: string,
+	watchlistId: string,
 	options: GetItemsOptions = {}
 ): Promise<ExtendedWatchlist> => {
 	let orderBy: string;
@@ -89,6 +62,22 @@ export const getDefaultWatchlistByUserId = async (
 			orderDirection = 'desc';
 	}
 
+	let defaultWatchlistType: 'isDefaultTowatchlist' | 'isDefaultWatchlist' | undefined;
+	switch (watchlistId) {
+		case 'towatchlist':
+			defaultWatchlistType = 'isDefaultTowatchlist';
+			break;
+		case 'watchlist':
+			defaultWatchlistType = 'isDefaultWatchlist';
+			break;
+		default:
+			defaultWatchlistType = undefined;  // Just for readability
+	}
+
+	const insertColumns: ('userId' | 'name' | 'isDefaultTowatchlist' | 'isDefaultWatchlist')[] = ['userId', 'name'];
+	if (defaultWatchlistType !== undefined)
+		insertColumns.push(defaultWatchlistType);
+
 	const promise = db
 		.with('swatchlist', (sw) =>
 			sw
@@ -101,7 +90,9 @@ export const getDefaultWatchlistByUserId = async (
 					)
 				)
 				.where('userId', '=', userId)
-				.where('isDefault', '=', true)
+				.if(defaultWatchlistType !== undefined, (s) => s.where(sql.ref(defaultWatchlistType ?? 'isDefaultWatchlist'), '=', true))
+				.if(defaultWatchlistType === undefined, (s) => s.where('watchlist.id', '=', watchlistId))
+				.assertType<ReadableDBWatchlist & { user: WatchlistUser }>()
 		)
 		.with('s', (s) =>
 			s
@@ -207,18 +198,24 @@ export const getDefaultWatchlistByUserId = async (
 						ExtendedWatchlistItem[]
 					>`COALESCE(json_agg(res) FILTER (WHERE res.id IS NOT NULL))`.as('items')
 				)
+				.assertType<{ items: ExtendedWatchlistItem[] }>()
 		)
 		.with('i', (i) =>
 			i
 				.insertInto('watchlist')
-				.columns(['userId', 'isDefault', 'name'])
+				.columns(insertColumns)
 				.expression((qb) =>
 					qb
 						.selectFrom(sql`(values (1))`.as('t'))
 						.select(sql`${userId}`.as('userId'))
-						.select(sql`true`.as('isDefault'))
 						.select(sql`'Default Watchlist'`.as('name'))
-						.whereNotExists((iqb) => iqb.selectFrom('swatchlist').select('id'))
+						.if(defaultWatchlistType !== undefined, (s) => s.select(sql`true`.as(defaultWatchlistType ?? 'isDefaultWatchlist')))
+						.whereNotExists((iqb) => iqb
+							.selectFrom('swatchlist')
+							.select('id')
+							
+						)
+						.if(defaultWatchlistType === undefined, (s) => s.where(sql`false`))  // Always fail to automatically create non default watchlist
 				)
 				.returningAll()
 				// .returning((qb) => )
@@ -227,6 +224,7 @@ export const getDefaultWatchlistByUserId = async (
 					FROM "user" WHERE "user"."id" = ${userId}
 				)`.as('user'))
 				.returning(sql<ExtendedWatchlistItem[]>`'[]'::JSON`.as('items'))
+				.assertType<ExtendedWatchlist>()
 		)
 		.selectFrom([
 			// 'swatchlist',
@@ -234,8 +232,8 @@ export const getDefaultWatchlistByUserId = async (
 				qb
 					.selectFrom('swatchlist as sw')
 					// .selectAll('swatchlist')
-					.select(['sw.id', 'sw.name', 'sw.description', 'sw.isPublic', 'sw.isDefault', 'sw.userId', 'sw.createdAt', 'sw.updatedAt', 'sw.user'])
-					.unionAll(qb.selectFrom('i').select(['i.id', 'i.name', 'i.description', 'i.isPublic', 'i.isDefault', 'i.userId', 'i.createdAt', 'i.updatedAt', 'i.user']))
+					.select(['sw.id', 'sw.name', 'sw.description', 'sw.isPublic', 'sw.isDefaultWatchlist', 'sw.isDefaultTowatchlist', 'sw.userId', 'sw.createdAt', 'sw.updatedAt', 'sw.user'])
+					.unionAll(qb.selectFrom('i').select(['i.id', 'i.name', 'i.description', 'i.isPublic', 'i.isDefaultWatchlist', 'i.isDefaultTowatchlist', 'i.userId', 'i.createdAt', 'i.updatedAt', 'i.user']))
 					.as('ww'),
 			(qb) =>
 				qb
@@ -263,27 +261,29 @@ export const getDefaultWatchlistByUserId = async (
 			message.includes('invalid input syntax for type uuid') ||
 			message.includes('watchlist_user_id_fkey')
 		) {
-			throw new NotFoundError('User not found');
+			throw new UserNotFoundError('User not found');
+		}
+		else if (message === 'no result') {
+			throw new WatchlistNotFoundError('Watchlist not found');
 		}
 
 		throw err;
 	}
 };
 
-export const getDefaultWatchlistItemsByUserId = async (
+export const getWatchlistItemsByUserId = async (
 	userId: string,
 	requesterUserId: string,
-	options: GetItemsOptions = {}
+	watchlistId: string,
+	options: GetItemsOptions = {},
 ): Promise<ExtendedWatchlistItem[]> => {
-	const watchlist = await getDefaultWatchlistByUserId(userId, requesterUserId, options);
+	const watchlist = await getWatchlistByUserId(userId, requesterUserId, watchlistId, options);
 
 	return watchlist?.items || [];
 };
 
 export const addIMDBItemsIfNotExists = async (itemIds: string[]): Promise<string[]> => {
 	if (itemIds.length <= 0) return [];
-
-	// TODO: FIX IMPORT DUPLICATES
 
 	const imdbItems = await db
 		.selectFrom('imdbItem')
@@ -405,12 +405,30 @@ export const addIMDBItemsIfNotExists = async (itemIds: string[]): Promise<string
 	return items.map((item) => item.id).concat(existingItemIds);
 };
 
-export const addItemsToDefaultWatchlistIfNotExists = async (
+export const addItemsToWatchlistIfNotExists = async (
 	userId: string,
-	itemIds: string[]
+	watchlistId: string,
+	itemIds: string[],
 ): Promise<ExtendedWatchlistItem[]> => {
 	// Make sure all the items exist in the database
 	const addedItemIds = await addIMDBItemsIfNotExists(itemIds);
+
+	let defaultWatchlistType: 'isDefaultWatchlist' | 'isDefaultTowatchlist' | undefined;
+	switch (watchlistId) {
+		case 'towatchlist':
+			defaultWatchlistType = 'isDefaultTowatchlist';
+			break;
+		case 'watchlist':
+			defaultWatchlistType = 'isDefaultWatchlist';
+			break;
+		default:
+			defaultWatchlistType = undefined;  // Just for readability
+	}
+
+	const insertColumns: ('userId' | 'name' | 'isDefaultWatchlist' | 'isDefaultTowatchlist')[] = ['userId', 'name'];
+	if (defaultWatchlistType !== undefined) {
+		insertColumns.push(defaultWatchlistType ?? 'isDefaultWatchlist');
+	}
 
 	const promise = db
 		.with('s', (s) =>
@@ -418,19 +436,21 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 				.selectFrom('watchlist')
 				.select('id')
 				.where('userId', '=', userId)
-				.where('isDefault', '=', true)
+				.if(defaultWatchlistType !== undefined, (s) => s.where(sql.ref(defaultWatchlistType ?? 'isDefaultWatchlist'), '=', true))
+				.if(defaultWatchlistType === undefined, (s) => s.where('id', '=', watchlistId))
 		)
 		.with('i', (i) =>
 			i
 				.insertInto('watchlist')
-				.columns(['userId', 'isDefault', 'name'])
+				.columns(insertColumns)
 				.expression((qb) =>
 					qb
 						.selectFrom(sql`(values (1))`.as('t'))
 						.select(sql`${userId}`.as('userId'))
-						.select(sql`true`.as('isDefault'))
 						.select(sql`'Default Watchlist'`.as('name'))
+						.if(defaultWatchlistType !== undefined, (q) => q.select(sql`true`.as(defaultWatchlistType ?? 'isDefaultWatchlist')))
 						.whereNotExists((iqb) => iqb.selectFrom('s').select(sql`1`.as('one')))
+						.if(defaultWatchlistType === undefined, (s) => s.where(sql`false`))  // Always fail to automatically create non default watchlist
 				)
 				.returning('id')
 		)
@@ -440,10 +460,10 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	let watchlistId: string;
+	let actualWatchlistId: string;
 	try {
 		const row = await promise;
-		watchlistId = row.id;
+		actualWatchlistId = row.id;
 	} catch (err) {
 		const { message } = err as Error;
 		console.log(message);
@@ -451,7 +471,10 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 			message.includes('invalid input syntax for type uuid') ||
 			message.includes('watchlist_user_id_fkey')
 		) {
-			throw new NotFoundError('User not found');
+			throw new UserNotFoundError('User not found');
+		}
+		else if (message === 'no result') {
+			throw new WatchlistNotFoundError('Watchlist not found');
 		}
 
 		throw err;
@@ -459,7 +482,7 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 
 	const newItems: { imdbItemId: string; watchlistId: string }[] = addedItemIds.map((itemId) => ({
 		imdbItemId: itemId,
-		watchlistId
+		watchlistId: actualWatchlistId,
 	}));
 
 	const formatted = newItems.map(
@@ -481,7 +504,7 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 	const newIds = ret.rows.map((row) => row.imdbItemId);
 
 	if (newIds.length > 0) {
-		const result = await getDefaultWatchlistItemsByUserId(userId, userId, {
+		const result = await getWatchlistItemsByUserId(userId, userId, watchlistId, {
 			imdbItemIds: newIds
 		});
 		return result;
@@ -489,7 +512,7 @@ export const addItemsToDefaultWatchlistIfNotExists = async (
 	return [];
 };
 
-export const deleteItemsFromDefaultWatchlist = async (itemIds: string[]): Promise<string[]> => {
+export const deleteItemsFromWatchlist = async (itemIds: string[]): Promise<string[]> => {
 	const deletedItemIds = await db
 		.deleteFrom('watchlistItem')
 		.where('id', 'in', itemIds)

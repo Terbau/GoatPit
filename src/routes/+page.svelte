@@ -64,7 +64,7 @@
               goto('/watchlist');
             }
             else {
-              goto(`/watchlist/${$user?.id}`);
+              goto(`/watchlist/${$user?.id}/watchlist`);
             }
           }}
           href="/"

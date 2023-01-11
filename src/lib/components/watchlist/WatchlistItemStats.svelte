@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ExtendedIMDBItem } from '$lib/server/functions';
+	import type { ExtendedIMDBItem } from '$lib/server/watchlist/functions';
 	import { activeWatchlistUserId } from '$lib/stores/watchlist';
 	import { getUser } from '@lucia-auth/sveltekit/client';
 	import type { EloRatingStats } from './Watchlist.svelte';

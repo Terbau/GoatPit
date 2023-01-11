@@ -54,11 +54,17 @@
         </div>
         Profile
       </a>
-      <a href="/watchlist/{$user?.id}">
+      <a href="/watchlist/{$user?.id}/watchlist">
         <div>
           <MovieIcon />
         </div>
-        My watchlist
+        My Watchlist
+      </a>
+      <a href="/watchlist/{$user?.id}/towatchlist">
+        <div>
+          <MovieIcon />
+        </div>
+        My To-Watchlist
       </a>
     </div>
 

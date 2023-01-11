@@ -63,7 +63,7 @@
 
     if (!$user) return;
 
-    const resp = await fetch(`/api/user/${$user.id}/watchlist/items`, {
+    const resp = await fetch(`/api/user/${$user.id}/watchlist/watchlist/items`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

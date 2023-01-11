@@ -1,25 +1,26 @@
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { addItemsToDefaultWatchlistIfNotExists, deleteItemsFromDefaultWatchlist, getDefaultWatchlistItemsByUserId } from "$lib/server/functions";
+import { addItemsToWatchlistIfNotExists, deleteItemsFromWatchlist, getWatchlistItemsByUserId } from "$lib/server/watchlist/functions";
 
 
 export const GET: RequestHandler = async ({ params, url, locals }) => {
   const session = await locals.validate();
   const userId = params.userId;
+  const watchlistId = params.watchlistId;
 
   const orderBy = url.searchParams.get("orderBy") || "eloRating" || "addedAt";
   const orderDirection = url.searchParams.get("orderDirection") || "DESC";
 
   try {
-    const items = await getDefaultWatchlistItemsByUserId(userId, session?.userId ?? '', {
+    const items = await getWatchlistItemsByUserId(userId, session?.userId ?? '', watchlistId, {
       orderBy,
       orderDirection,
     });
     return json(items);
   } catch (e) {
     const err = e as Error;
-    if (err.name === "NotFoundError") {
-      throw error(404, "User not found");
+    if (["UserNotFoundError", "WatchlistNotFoundError"].includes(err.name)) {
+      throw error(404, err.message);
     }
 
     throw e;
@@ -29,6 +30,7 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
 
 export const POST: RequestHandler = async ({ params, request, locals }) => {
   const userId = params.userId;
+  const watchlistId = params.watchlistId; 
   const session = await locals.validate();
 
   if (!session) {
@@ -49,7 +51,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
     throw error(400, "Invalid few or too many items (max 100)");
   }
 
-  const result = await addItemsToDefaultWatchlistIfNotExists(userId, body);
+  const result = await addItemsToWatchlistIfNotExists(userId, watchlistId, body);
 
   return json({
     result: "success",
@@ -57,6 +59,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
   })
 }
 
+// Doesn't really need params.watchlistId, but no reason to change anything
 export const DELETE: RequestHandler = async ({ params, request, locals }) => {
   const userId = params.userId;
   const session = await locals.validate();
@@ -79,7 +82,7 @@ export const DELETE: RequestHandler = async ({ params, request, locals }) => {
   //   throw error(400, "Invalid few or too many items (max 100)");
   // }
 
-  const result = await deleteItemsFromDefaultWatchlist(itemIds);
+  const result = await deleteItemsFromWatchlist(itemIds);
 
   return json({
     result: "success",

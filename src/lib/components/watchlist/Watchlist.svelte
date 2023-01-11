@@ -12,7 +12,7 @@
 	import { browser } from '$app/environment';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import type { ExtendedWatchlist, ExtendedWatchlistItem } from '$lib/server/functions';
+	import type { ExtendedWatchlist, ExtendedWatchlistItem } from '$lib/server/watchlist/types';
 	import {
 		watchlistSortDirection,
 		watchlistSortOption,
@@ -21,7 +21,7 @@
 		watchlistSearchKeyword,
 		isEditingItems,
 		selectedItemIds,
-		defaultWatchlist
+		watchlistItems
 	} from '$lib/stores/watchlist';
 	import { getUser } from '@lucia-auth/sveltekit/client';
 	import { onDestroy } from 'svelte';
@@ -39,13 +39,15 @@
 	export let items: Writable<ExtendedWatchlistItem[]>;
 	export let isDefault = true;
 	export let userId = '';
+	export let watchlistId: string;
 
 	const user = getUser();
 	let loading = true;
 	let isNavigateLoading = true;
 	let initialHasLoaded = false;
-	let watchlistInfo: WatchlistInfo;
+	let watchlistInfo: WatchlistInfo | null = null;
 	let eloRatingStats: EloRatingStats;
+	let errorMessage: string;
 
 	const _sort = $page.url.searchParams.get('sort');
 	const _order = $page.url.searchParams.get('order');
@@ -83,6 +85,7 @@
 	const fetchAndSetItems = async (isNavigate: boolean = false) => {
 		if (!browser) return;
 
+		errorMessage = '';
 		loading = true;
 		isNavigateLoading = isNavigate;
 
@@ -98,11 +101,18 @@
 			keepFocus: true,
 		})
 
-		const resp = await fetch(`http://127.0.0.1:5173/api/user/${userId}/watchlist?` + params);
-		const resultData: ExtendedWatchlist = await resp.json();
+		const resp = await fetch(`http://127.0.0.1:5173/api/user/${userId}/watchlist/${watchlistId}/?` + params);
+		if (resp.status === 404) {
+			const resultData: { message: string } = await resp.json();
+			errorMessage = resultData.message;
+			items.set([])
+		}
+		else {
+			const resultData: ExtendedWatchlist = await resp.json();
+			items.set(resultData.items);
+			watchlistInfo = resultData;
+		}
 
-		items.set(resultData.items);
-		watchlistInfo = resultData;
 		loading = false;
 		isNavigateLoading = false;
 		initialHasLoaded = true;
@@ -155,8 +165,8 @@
 	});
 </script>
 
-<div class="flex flex-row gap-x-10 grow mt-[-1rem]">
-	<div class="flex flex-col w-full gap-y-4">
+<div class="flex flex-row w-full gap-x-10 grow mt-[-1rem] justify-center">
+	<div class="flex flex-col w-full gap-y-4 max-w-2xl">
 		<div
 			class="flex flex-row w-full items-center gap-x-2 {loading || $items.length > 0
 				? ''
@@ -192,6 +202,8 @@
 					{/if}
 				{/each}
 			</ul>
+		{:else if errorMessage && !loading}
+			<p class="text-center text-red-11">{errorMessage}</p>
 		{:else}
 			<p class="text-center">No items in watchlist.</p>
 		{/if}

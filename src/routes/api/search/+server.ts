@@ -1,5 +1,5 @@
 import { json, error } from '@sveltejs/kit';
-import { searchIMDB } from '$lib/server/functions';
+import { searchIMDB } from '$lib/server/watchlist/functions';
 import type { RequestHandler } from './$types';
 
 

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import type { IMDBGenre } from '$lib/server/database/types/imdb';
-	import type { ExtendedWatchlistItem } from '$lib/server/functions';
+	import type { ExtendedWatchlistItem } from '$lib/server/watchlist/types';
 	import { addAlert } from '$lib/stores/alert';
 	import {
-		defaultWatchlist,
+		watchlistItems,
 		watchlistActiveGenres,
 		watchlistIsLoading,
 		watchlistSearchKeyword
@@ -20,7 +20,7 @@
 	let genres: string[];
 	$: genres = (() => {
 		const genresSet = new Set<string>();
-		$defaultWatchlist.forEach((item: ExtendedWatchlistItem) => {
+		$watchlistItems.forEach((item: ExtendedWatchlistItem) => {
 			item.item.genres.forEach((genre) => {
 				if (genresSet.has(genre.name)) return;
 
@@ -53,7 +53,7 @@
 	};
 </script>
 
-<div class="w-64 mt-12 shrink-0 flex flex-col gap-y-10">
+<div class="w-64 mt-12 shrink-0 flex-col gap-y-10 hidden xl:flex">
 	{#if $watchlistIsLoading}
 		<div class="flex flex-col gap-y-2">
 			<div class="skeleton-bar h-8 w-1/2"></div>
@@ -68,7 +68,7 @@
 			<div class="skeleton-bar h-8 w-3/5" />
 			<div class="skeleton-bar h-8 w-3/5" />
 		</div>
-	{:else}
+	{:else if $watchlistItems.length > 0}
 		<div class="">
 			<h2 class="mb-1 ml-1">Find item in list</h2>
 			<input
@@ -80,7 +80,7 @@
 		</div>
 	{/if}
 
-	{#if genres.length >= 0 && $defaultWatchlist.length > 0}
+	{#if genres.length >= 0 && $watchlistItems.length > 0}
 		<form on:change={handleGenreChange}>
 			<h2>Genres</h2>
 			<div class="flex flex-row items-center gap-x-1 mt-2">

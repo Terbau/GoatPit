@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
 	import { page } from "$app/stores";
-	import type { ExtendedWatchlistItem } from "$lib/server/functions";
+	import type { ExtendedWatchlistItem } from "$lib/server/watchlist/functions";
 	import { addAlert } from "$lib/stores/alert";
-	import { isEditingItems, removeFromWatchlist, selectedItemIds } from "$lib/stores/watchlist";
+	import { activeWatchlistId, isEditingItems, removeFromWatchlist, selectedItemIds } from "$lib/stores/watchlist";
 	import { createEventDispatcher } from "svelte";
 	import type { Writable } from "svelte/store";
 	import DeleteIcon from "../icons/DeleteIcon.svelte";
@@ -19,7 +19,7 @@
 		const itemIds = [...$selectedItemIds];
     if (itemIds.length === 0) return;
 
-		const resp = await fetch(`/api/user/${$page.params.userId}/watchlist/items`, {
+		const resp = await fetch(`/api/user/${$page.params.userId}/watchlist/${$activeWatchlistId}/items`, {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json'

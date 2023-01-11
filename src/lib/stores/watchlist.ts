@@ -1,11 +1,12 @@
 import { browser } from '$app/environment';
-import type { ExtendedWatchlistItem } from '$lib/server/functions';
+import type { ExtendedWatchlistItem } from '$lib/server/watchlist/types';
 import { writable, type Writable } from "svelte/store";
 
-export const defaultWatchlist: Writable<ExtendedWatchlistItem[]> = writable([]);
+export const watchlistItems: Writable<ExtendedWatchlistItem[]> = writable([]);
 export const watchlistIsLoading = writable(true);
 export const watchlistSearchKeyword = writable("");
 
+export const activeWatchlistId = writable("");
 export const activeWatchlistUserId = writable("");
 export const watchlistItemIsHighlighted = writable(false);
 
@@ -41,7 +42,7 @@ watchlistSortOption.subscribe((value) => {
 export const appendToWatchlist = (items: ExtendedWatchlistItem[]) => {
   if (items.length === 0) return;
 
-  defaultWatchlist.update((currentItems) => {
+  watchlistItems.update((currentItems) => {
     return [...currentItems, ...items];
   });
 }
@@ -49,13 +50,13 @@ export const appendToWatchlist = (items: ExtendedWatchlistItem[]) => {
 export const prependToWatchlist = (items: ExtendedWatchlistItem[]) => {
   if (items.length === 0) return;
 
-  defaultWatchlist.update((currentItems) => {
+  watchlistItems.update((currentItems) => {
     return [...items, ...currentItems];
   });
 }
 
 export const removeFromWatchlist = (watchlistItemIds: string[]) => {
-  defaultWatchlist.update((items) => {
+  watchlistItems.update((items) => {
     return items.filter((item) => !watchlistItemIds.includes(item.id as any));
   });
 }

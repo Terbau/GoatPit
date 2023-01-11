@@ -32,7 +32,7 @@
 			<!-- <h2 class="text-xl font-bold">Want to try out AutoRank?</h2> -->
 			<a
 				href="/autorank/setup"
-				class="rounded-lg px-10 py-4 text-md w-fit bg-blue-9 hover:bg-blue-10 active:bg-blue-11 transition"
+				class="rounded-lg px-10 py-4 text-md w-fit bg-blue-8 hover:bg-blue-9 active:bg-blue-10 transition"
 				>Try out AutoRank</a
 			>
 		</div>

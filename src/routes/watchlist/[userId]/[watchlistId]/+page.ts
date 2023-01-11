@@ -1,5 +1,5 @@
-import type { ExtendedWatchlistItem } from '$lib/server/functions';
-// import { getDefaultWatchlistItemsByUserId, type ExtendedWatchlistItem } from '$lib/server/functions';
+import type { ExtendedWatchlistItem } from '$lib/server/watchlist/types';
+// import { getDefaultWatchlistItemsByUserId, type ExtendedWatchlistItem } from '$lib/server/watchlist/functions';
 import type { Generated } from 'kysely';
 import type { PageLoad } from './$types';
 
