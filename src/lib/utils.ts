@@ -116,3 +116,25 @@ export function betterSlide(node: HTMLElement, { delay = 0, duration = 400, easi
       `border-${secondary_dimensions[1].toLowerCase()}-width: ${t * border_width_end_value}px;`
   };
 }
+
+
+export const preloadImages = async (urls: string[], transform?: (url: string) => string): Promise<string[]> => {
+  const result = await Promise.all(
+    urls.map((url) => {
+      return new Promise((resolve) => {
+        const newUrl = transform ? transform(url) : url;
+
+        const image = new Image();
+        image.src = newUrl;
+        image.onload = () => resolve(newUrl);
+      });
+    })
+  );
+
+  return result as string[];
+}
+
+export const preloadImage = async (url: string, transform?: (url: string) => string): Promise<string> => {
+  const result = await preloadImages([url], transform);
+  return result[0];
+}

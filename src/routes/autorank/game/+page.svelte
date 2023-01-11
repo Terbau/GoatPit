@@ -1,7 +1,7 @@
 <script lang="ts">
 	import WarningIcon from '$lib/components/icons/WarningIcon.svelte';
 	import { currentGame } from '$lib/stores/autorank';
-	import { decodeJwtNoVerify, sleep, transformImdbImageSize } from '$lib/utils';
+	import { decodeJwtNoVerify, preloadImages, sleep, transformImdbImageSize } from '$lib/utils';
 	import { getUser } from '@lucia-auth/sveltekit/client';
 	import type { PageData } from './$types';
 	import type { ItemEloMatchup, RandomMatchup, RandomMatchupPayload } from '$lib/server/elo/types';
@@ -49,18 +49,6 @@
 		}
 	};
 
-  export const preloadImages = async (urls: string[]): Promise<void> => {
-    await Promise.all(
-      urls.map((url) => {
-        return new Promise((resolve) => {
-          const image = new Image();
-          image.src = url;
-          image.onload = resolve;
-        });
-      })
-    );
-  }
-
 	const handleClick = async (itemNum: 1 | 2) => {
     if (!browser) return;
 
@@ -102,17 +90,16 @@
     if (resp.ok) {
       const newGameData: RandomMatchupPayload = await resp.json();
 
+      const preItem1Image = newGameData.items[0].imageUrl;
+      const preItem2Image = newGameData.items[1].imageUrl;
       
-      const preItem1Image = transformImdbImageSize(newGameData.items[0].imageUrl, 300);
-      const preItem2Image = transformImdbImageSize(newGameData.items[1].imageUrl, 300);
-      
-      await Promise.all([
+      const result = await Promise.all([
+				await preloadImages([preItem1Image, preItem2Image], (url) => transformImdbImageSize(url, 300)),
         await sleepPromise,
-        await preloadImages([preItem1Image, preItem2Image]),
       ]);
 
-      item1Image = preItem1Image;
-      item2Image = preItem2Image;
+      item1Image = result[0][0];
+      item2Image = result[0][1];
 
       currentGame.set(newGameData);
       resetState();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { sleep, transformImdbImageSize } from "$lib/utils";
+	import { preloadImages, sleep, transformImdbImageSize } from "$lib/utils";
 	import { onDestroy, onMount } from "svelte";
 	import { fade } from "svelte/transition";
 
@@ -24,23 +24,6 @@
       url: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_QL75_UX190_CR0,0,190,281_.jpg',
     },
   ]
-
-  const preloadImages = async (urls: string[]): Promise<void> => {
-    await Promise.all(
-      urls.map((url) => {
-        return new Promise((resolve) => {
-          const image = new Image();
-          image.src = url;
-          image.onload = resolve;
-        });
-      })
-    );
-  }
-
-  const preloadAllImages = async () => {
-    const urls = items.map((item) => transformImdbImageSize(item.url, 100));
-    await preloadImages(urls);
-  }
 
   let currentIndex = 0;
 
@@ -81,15 +64,15 @@
 
 
 <div class="mx-auto flex flex-col items-center justify-center box-border gap-y-5">
-  {#await preloadAllImages()}
+  {#await preloadImages(items.map((item) => transformImdbImageSize(item.url, 100)))}
     <!-- Loading... -->
-  {:then}
+  {:then imageUrls}
     <h1 class="font-bold text-lg md:text-xl">Which movie is better?</h1>
     <div class="movie-container flex flex-row">
       <div
         class="movie rounded-l-2xl flex-row {item1Classes}"
       >
-        <img transition:fade src={items[currentIndex].url} alt="" />
+        <img transition:fade src={imageUrls[currentIndex]} alt="" />
         <div>
           <h2>{items[currentIndex].name}</h2>
           <p>1000</p>

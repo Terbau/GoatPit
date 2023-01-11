@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { transformImdbImageSize } from "$lib/utils";
+	import { preloadImages, transformImdbImageSize } from "$lib/utils";
 	import { onDestroy, onMount } from "svelte";
 
   const items = [
@@ -41,23 +41,6 @@
     },
   ]
 
-  const preloadImages = async (urls: string[]): Promise<void> => {
-    await Promise.all(
-      urls.map((url) => {
-        return new Promise((resolve) => {
-          const image = new Image();
-          image.src = url;
-          image.onload = resolve;
-        });
-      })
-    );
-  }
-
-  const preloadAllImages = async () => {
-    const urls = items.map((item) => transformImdbImageSize(item.url, 100));
-    await preloadImages(urls);
-  }
-
   const run = async () => {
     
   }
@@ -77,9 +60,9 @@
 
 
 <div>
-  {#await preloadAllImages()}
+  {#await preloadImages(items.map((item) => transformImdbImageSize(item.url, 100)))}
     <!-- Loading... -->
-  {:then}
+  {:then imageUrls}
     <ul class="list flex flex-col items-center gap-y-4 overflow-y-hidden mt-3">
       <!-- each i in range 8 -->
       {#each Array(items.length*2) as _, i}
@@ -93,7 +76,7 @@
           >
             <img
               class="h-24 w-16 object-fill shrink-0 rounded-l-xl"
-              src={items[i%items.length].url}
+              src={imageUrls[i%items.length]}
               loading="lazy"
               alt=""
             />

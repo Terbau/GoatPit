@@ -4,7 +4,7 @@
 	import { activeWatchlistUserId, prependToWatchlist } from "$lib/stores/watchlist";
 	import { addAlert } from "$lib/stores/alert";
 	import LoadingSearchInput from "../input/LoadingSearchInput.svelte";
-	import { clickOutside, transformImdbImageSize } from "$lib/utils";
+	import { preloadImage, clickOutside, transformImdbImageSize } from "$lib/utils";
 	import { getUser } from "@lucia-auth/sveltekit/client";
 	import { browser } from "$app/environment";
 
@@ -108,29 +108,33 @@
     >
       {#each resultEntries as entry}
         {#if entry.image}
-          <li>
-            <a 
-              href="/" 
-              class="w-full h-full flex flex-row cursor-pointer hover:bg-indigo-4 px-4 items-center gap-x-2"
-            >
-              <img class="h-16 w-12 object-fill shrink-0" src={transformImdbImageSize(entry.image.imageUrl, 100)} loading="lazy" alt="">
-              <div class="flex flex-col truncate">
-                <div class="w-full truncate font-bold text-lg">{entry.title}</div>
-                <div class="text-sm text-gray-500">
-                  {entry.yearReleased || currentYear}
-                </div>
-              </div>
-              <div class="flex-grow" />
-              <button
-                disabled={!$user}
-                class="bg-indigo-8 text-white font-bold py-2 px-4 rounded hover:bg-indigo-9 active:bg-indigo-10
-                      disabled:bg-slate-9 disabled:cursor-not-allowed"
-                on:click|stopPropagation|preventDefault={(e) => handleAddToWatchlist(entry, e)}
+          {#await preloadImage(transformImdbImageSize(entry.image.imageUrl, 100))}
+             <!-- Loading... -->
+          {:then imageUrl}
+            <li>
+              <a 
+                href="/" 
+                class="w-full h-full flex flex-row cursor-pointer hover:bg-indigo-4 px-4 items-center gap-x-2"
               >
-                Add
-              </button>
-            </a>
-          </li>
+                <img class="h-16 w-12 object-fill shrink-0" src={imageUrl} loading="lazy" alt="">
+                <div class="flex flex-col truncate">
+                  <div class="w-full truncate font-bold text-lg">{entry.title}</div>
+                  <div class="text-sm text-gray-500">
+                    {entry.yearReleased || currentYear}
+                  </div>
+                </div>
+                <div class="flex-grow" />
+                <button
+                  disabled={!$user}
+                  class="bg-indigo-8 text-white font-bold py-2 px-4 rounded hover:bg-indigo-9 active:bg-indigo-10
+                        disabled:bg-slate-9 disabled:cursor-not-allowed"
+                  on:click|stopPropagation|preventDefault={(e) => handleAddToWatchlist(entry, e)}
+                >
+                  Add
+                </button>
+              </a>
+            </li>
+          {/await}
         {/if}
       {/each}
     </ul>
