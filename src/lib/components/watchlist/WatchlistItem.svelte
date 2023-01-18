@@ -123,7 +123,7 @@
 					{$isEditingItems && !isSelected ? 'hover:ring-4 active:ring-4 ring-solid hover:ring-indigo-11 active:ring-indigo-10' : ''}"
 	>
 		<img
-			class="h-24 sm:h-48 object-fill rounded-l-xl"
+			class="h-24 w-16 sm:h-48 sm:w-32 object-fill rounded-l-xl"
 			src={transformImdbImageSize(imdbItem.imageUrl, 300)}
 			loading="lazy"
 			alt=""
