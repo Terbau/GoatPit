@@ -21,3 +21,12 @@ GOOGLE_CLIENT_ID=""      // Your google client id
 GOOGLE_CLIENT_SECRET=""  // Your google secret
 ```
 3. Run the dev server with `make dev`
+
+
+# Preview
+
+## Landing page
+![alt text](./static/images/landingpagegoatpit.png "Landing page")
+
+## Autorank
+![alt text](./static/gifs/Peek%202023-02-13%2013-35.gif "Autorank")
