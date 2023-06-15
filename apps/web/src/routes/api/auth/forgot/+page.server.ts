@@ -2,7 +2,7 @@ import { db } from '$lib/server/database';
 import { isValidEmail } from '$lib/utils';
 import { error, type Actions } from '@sveltejs/kit';
 import jwt, { type Secret } from 'jsonwebtoken';
-import { JWT_SECRET, SENDGRID_SENDER, DOMAIN } from '$env/static/private';
+import { JWT_SECRET, SENDGRID_SENDER } from '$env/static/private';
 import type { MailDataRequired } from '@sendgrid/mail';
 import { sendMessage } from '$lib/server/sendgrid';
 
@@ -49,13 +49,15 @@ export const actions: Actions = {
       { expiresIn: '30m' },
     );
 
+    const host = request.headers.get("host");
+
     const message: MailDataRequired = {
       to: { email: email },
       from: SENDGRID_SENDER,
       subject: "GoatPit Password Reset",
       html: `
         <p>Click the link below to reset your password.</p>
-        <p><a href="http://${DOMAIN}/reset?token=${token}">Reset Password</a></p>
+        <p><a href="http://${host}/reset?token=${token}">Reset Password</a></p>
         <br/>
         <p>This link will expire in 30 minutes.</p>
         <p>If you did not request a password reset, you can safely ignore this email.</p>

@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { Pool } from 'pg';
+import pg from 'pg';
 import { promises as fs } from 'fs';
 import {
   type MigrationProvider,
@@ -22,7 +22,7 @@ console.log(process.env.DATABASE_URL)
 
 export const db = new Kysely<Database>({
   dialect: new PostgresDialect({
-    pool: new Pool({
+    pool: new pg.Pool({
       connectionString: DATABASE_URL,
       // host: 'localhost',
       // port: 5434,
