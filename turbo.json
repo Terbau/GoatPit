@@ -7,7 +7,7 @@
     },
     "build:prod": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**"]
+      "outputs": [".svelte-kit/**"]
     },
     "lint": {
       "outputs": []
