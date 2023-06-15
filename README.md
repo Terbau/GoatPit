@@ -1,6 +1,8 @@
 # GoatPit
 WIP website for organizing and ranking your watched movies. Made primarily because I wanted to learn component based frontend with sveltekit, typescript, tailwind and kysely.
 
+https://goat-pit.vercel.app
+
 
 # Prerequisites
 - node
