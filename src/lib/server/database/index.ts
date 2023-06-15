@@ -11,20 +11,24 @@ import {
   CamelCasePlugin,
 } from 'kysely';
 import type { Database } from './types';
+import { DATABASE_URL } from '$env/static/private';
 import * as m1 from './migrations/0001_user_session';
 import * as m2 from './migrations/0002_imdb';
 import * as m3 from './migrations/0003_watchlist';
 import * as m4 from './migrations/0004_eloranking';
 
 
+console.log(process.env.DATABASE_URL)
+
 export const db = new Kysely<Database>({
   dialect: new PostgresDialect({
     pool: new Pool({
-      host: 'localhost',
-      port: 5434,
-      database: 'dev',
-      user: 'postgres',
-      password: 'postgres',
+      connectionString: DATABASE_URL,
+      // host: 'localhost',
+      // port: 5434,
+      // database: 'dev',
+      // user: 'postgres',
+      // password: 'postgres',
     }),
   }),
   plugins: [new CamelCasePlugin()]
