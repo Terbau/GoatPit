@@ -20,10 +20,10 @@
 
 <div
   class="h-12 w-12 relative group"
+  tabindex="0"
 >
   <button
     class="rounded-full border border-solid p-[0.125rem] border-transparent active:border-blue-9"
-    tabindex="0"
   >
     <ProfileIcon />
   </button>
