@@ -19,7 +19,7 @@
     "@radix-ui/colors": "^0.1.8",
     "@sendgrid/mail": "^7.7.0",
     "@sveltejs/adapter-auto": "^1.0.0",
-    "@sveltejs/kit": "^1.0.0",
+    "@sveltejs/kit": "^1.20.2",
     "@types/jsonwebtoken": "^8.5.9",
     "@types/pg": "^8.6.5",
     "@types/uuid": "^9.0.0",
