@@ -1,18 +1,20 @@
 import * as path from 'path';
-import { Pool } from 'pg';
-import { promises as fs } from 'fs';
+
 import {
+  FileMigrationProvider,
   Kysely,
   Migrator,
-  PostgresDialect,
-  FileMigrationProvider
+  PostgresDialect
 } from 'kysely';
+
 import type { Database } from './types';
+import { promises as fs } from 'fs';
+import pg from 'pg';
 
 async function migrateToLatest() {
   const db = new Kysely<Database>({
     dialect: new PostgresDialect({
-      pool: new Pool({
+      pool: new pg.Pool({
         host: 'localhost',
         port: 5432,
         database: 'my_database',
