@@ -50,7 +50,8 @@
   },
   "type": "module",
   "dependencies": {
-    "pnpm": "^7.18.2",
-    "@goatpit/imdb": "workspace:*"
+    "@goatpit/imdb": "workspace:*",
+    "@sveltejs/adapter-vercel": "^3.0.1",
+    "pnpm": "^7.18.2"
   }
 }
