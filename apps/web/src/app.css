@@ -5,15 +5,15 @@
 
 @layer components {
   .bordered-button-indigo {
-    @apply px-8 py-2 rounded-md text-blue-11 border border-solid border-blue-7 hover:border-blue-8
+    @apply px-6 py-2 rounded-md text-blue-11 border border-solid border-blue-7 hover:border-blue-8
   }
 
   .bordered-button-red {
-    @apply px-8 py-2 rounded-md text-red-11 border border-solid border-red-7 hover:border-red-8
+    @apply px-6 py-2 rounded-md text-red-11 border border-solid border-red-7 hover:border-red-8
   }
 
   .bordered-button-green {
-    @apply px-8 py-2 rounded-md text-green-11 border border-solid border-green-7 hover:border-green-8
+    @apply px-6 py-2 rounded-md text-green-11 border border-solid border-green-7 hover:border-green-8
   }
 
   /* Override daisyui padding for alerts */

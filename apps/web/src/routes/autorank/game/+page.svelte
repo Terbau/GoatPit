@@ -133,11 +133,11 @@
 	<!-- Could use else but typescript wont shut up -->
 	<div class="mt-10 mx-auto flex flex-col items-center w-full gap-y-10">
 		<h1 class="font-bold text-2xl">Which movie is better?</h1>
-		<div class="movie-container flex flex-row px-24">
+		<div class="movie-container flex flex-col sm:flex-row px-12 gap-y-6">
 			<button
 				bind:this={item1Element}
 				on:click={() => handleClick(1)}
-				class="movie rounded-l-2xl flex-row {item1Classes}"
+				class="movie rounded-2xl sm:rounded-r-none flex-row {item1Classes}"
 			>
 				<img src={item1Image || transformImdbImageSize(item1.imageUrl)} alt="" />
 				<div>
@@ -146,12 +146,12 @@
 				</div>
 			</button>
 
-			<div class="divider divider-horizontal px-10">Or</div>
+			<div class="divider divider-vertical sm:divider-horizontal px-6 xl:px-10">Or</div>
 
 			<button
 				bind:this={item2Element}
 				on:click={() => handleClick(2)}
-				class="movie rounded-r-2xl flex-row-reverse {item2Classes}"
+				class="movie rounded-2xl sm:rounded-l-none flex-row-reverse {item2Classes}"
 			>
 				<img src={item2Image || transformImdbImageSize(item2.imageUrl)} alt="" />
 				<div>
@@ -161,7 +161,7 @@
 			</button>
 		</div>
 
-		<div class="flex justify-center gap-x-2 h-full w-full items-end">
+		<div class="flex justify-center gap-x-2 h-full w-full items-end mt-8 sm:mt-0">
 			<kbd class="kbd">◀︎</kbd>
 			<div class="flex flex-col inner-kbd gap-y-2">
 				<kbd class="kbd">▲</kbd>
@@ -193,7 +193,7 @@
 	}
 
 	.movie {
-		@apply flex h-64 max-w-lg min-w-min w-screen bg-base-200 overflow-hidden transition duration-500 shadow-2xl;
+		@apply flex h-32 w-[16rem] sm:w-[14rem] md:w-[18rem] lg:w-96 md:h-48 xl:h-64 xl:w-[30rem] 2xl:w-[34rem] bg-base-200 overflow-hidden transition duration-500 shadow-2xl;
 	}
 
 	.movie > div {
@@ -201,10 +201,10 @@
 	}
 
 	.movie h2 {
-		@apply font-bold text-3xl;
+		@apply font-bold md:text-xl lg:text-2xl xl:text-3xl;
 	}
 
 	.movie-container img {
-		@apply object-fill shrink-0 h-64 w-44;
+		@apply object-fill shrink-0 h-32 w-24 md:h-48 md:w-32 xl:h-64 xl:w-44;
 	}
 </style>

@@ -124,7 +124,7 @@
   <h2 class="text-lg mb-5 text-indigo-12 text-center">Login or Sign Up</h2>
 
   <form
-    class="form-control flex flex-col gap-4 w-72"
+    class="form-control flex flex-col gap-4"
     on:submit|preventDefault="{handleSubmit}"
   >
     <div class="flex flex-col gap-4">

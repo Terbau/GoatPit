@@ -8,20 +8,33 @@
 	import AlertContainer from "$lib/components/alert/AlertContainer.svelte";
 	import Footer from "$lib/components/footer/Footer.svelte";
 	import NavSidebar from "$lib/components/navbar/NavSidebar.svelte";
+  import { browser } from "$app/environment";
+  import { QueryClient, QueryClientProvider } from "@tanstack/svelte-query";
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        enabled: browser,
+      }
+    }
+  });
 
 	handleSession(page);
 </script>
 
-<div class="test w-full min-h-screen text-indigo-12 flex flex-col">
-  <div class="mt-16"></div>
-  <Navbar />
-  <!-- <NavSidebar /> -->
-  <LoginModal />
-  <AlertContainer />
-  <slot></slot>
-  <div class="mt-16"></div>
-  <Footer />
-</div>
+<QueryClientProvider client={queryClient}>
+  <div class="test w-full min-h-screen text-indigo-12 flex flex-col">
+    <div class="mt-16"></div>
+    <Navbar />
+    <!-- <NavSidebar /> -->
+    <LoginModal />
+    <AlertContainer />
+    <slot></slot>
+    <div class="mt-16"></div>
+    <Footer />
+  </div>
+</QueryClientProvider>
+
 
 <style lang="postcss">
   .test {

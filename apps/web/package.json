@@ -52,6 +52,7 @@
   "dependencies": {
     "@goatpit/imdb": "workspace:*",
     "@sveltejs/adapter-vercel": "^3.0.1",
+    "@tanstack/svelte-query": "^4.29.11",
     "pnpm": "^7.18.2"
   }
 }
