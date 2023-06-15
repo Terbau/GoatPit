@@ -193,7 +193,7 @@
 	}
 
 	.movie {
-		@apply flex h-32 w-[16rem] sm:w-[14rem] md:w-[18rem] lg:w-96 md:h-48 xl:h-64 xl:w-[30rem] 2xl:w-[34rem] bg-base-200 overflow-hidden transition duration-500 shadow-2xl;
+		@apply flex h-36 w-[18rem] sm:w-[14rem] md:w-[18rem] lg:w-96 md:h-48 xl:h-64 xl:w-[30rem] 2xl:w-[34rem] bg-base-200 overflow-hidden transition duration-500 shadow-2xl;
 	}
 
 	.movie > div {
@@ -205,6 +205,6 @@
 	}
 
 	.movie-container img {
-		@apply object-fill shrink-0 h-32 w-24 md:h-48 md:w-32 xl:h-64 xl:w-44;
+		@apply object-fill shrink-0 h-40 w-28 md:h-48 md:w-32 xl:h-64 xl:w-44;
 	}
 </style>
