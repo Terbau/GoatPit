@@ -100,8 +100,8 @@
 			noScroll: true,
 			keepFocus: true,
 		})
-
-		const resp = await fetch(`http://127.0.0.1:5173/api/user/${userId}/watchlist/${watchlistId}/?` + params);
+		
+		const resp = await fetch(`${window.location.protocol}//${window.location.host}/api/user/${userId}/watchlist/${watchlistId}/?` + params);
 		if (resp.status === 404) {
 			const resultData: { message: string } = await resp.json();
 			errorMessage = resultData.message;
