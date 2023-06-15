@@ -102,6 +102,7 @@ dist
 .DS_Store
 /build
 /.svelte-kit
+/apps/web/.svelte-kit
 /package
 .env
 .env.*
@@ -111,3 +112,4 @@ vite.config.ts.timestamp-*
 
 .vscode
 postgres-data
+.turbo

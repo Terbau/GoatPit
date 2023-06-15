@@ -64,7 +64,7 @@
               >
             </li>
             <li>
-              <SidebarLink href="/">Discover</SidebarLink>
+              <SidebarLink href="/discover">Discover</SidebarLink>
             </li>
             <!-- <li>
               <Link href="/">Info</Link>
